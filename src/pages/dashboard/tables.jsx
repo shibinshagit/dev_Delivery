@@ -48,7 +48,7 @@ export function Tables() {
   };
 
   const handleUpdate = (id) => {
-    navigate(`/updateorder/${id}`);
+    navigate(`/dashboard/update/${id}`);
   };
 
   const handleSearch = (event) => {
@@ -147,6 +147,8 @@ export function Tables() {
                 const { orders } = user;
                 const lastOrder = orders[orders.length - 1] || {};
                 const { status, orderEnd } = lastOrder;
+                const formattedDate = orderEnd ? new Intl.DateTimeFormat('en-GB').format(new Date(orderEnd)) : '';
+
 
                 return (
                   <tr key={user._id} className="even:bg-blue-gray-50/50">
@@ -200,13 +202,12 @@ export function Tables() {
                     </td>
                     <td className={className}>
                       <Typography className="text-xs font-semibold text-blue-gray-600">
-                        {orderEnd || 'N/A'}
+                        {formattedDate || 'N/A'}
                       </Typography>
                     </td>
                     <td className={className}>
                       <Typography
                         as="a"
-                        href="#"
                         className="text-xs font-semibold text-blue-gray-600"
                         onClick={() => handleUpdate(user._id)}
                       >

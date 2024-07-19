@@ -31,8 +31,8 @@ export const routes = [
         element: <Tables />,
       },{
         icon: <UserCircleIcon {...icon} />,
-        name: "profile",
-        path: "/profile",
+        name: "update",
+        path: "/update/:id",
         element: <Profile />,
       },{
         icon: <UserCircleIcon {...icon} />,
@@ -42,7 +42,7 @@ export const routes = [
       },
       {
         icon: <InformationCircleIcon {...icon} />,
-        name: "notifications",
+        name: "delivery",
         path: "/notifications",
         element: <Notifications />,
       },
