@@ -24,11 +24,13 @@ import {
   fetchStatistics,
 } from "@/data";
 import { CheckCircleIcon, ClockIcon } from "@heroicons/react/24/solid";
+import { SkeletonContainer, SkeletonImage, SkeletonParagraph, SkeletonSubtitle, SkeletonTitle } from "@/helpers/skeleton";
 
 export function Home() {
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
 
   useEffect(() => {
     const updateStatistics = async () => {
@@ -47,7 +49,16 @@ export function Home() {
   }, [date]);
 
   if (loading) {
-    return <p>Loading...</p>;
+    return <>
+     <SkeletonContainer>
+    <SkeletonTitle />
+    <SkeletonSubtitle />
+    <SkeletonParagraph />
+    <SkeletonParagraph />
+    <SkeletonParagraph style={{ width: '75%' }} />
+    <SkeletonImage />
+  </SkeletonContainer>
+  </>;
   }
 
   if (error) {
