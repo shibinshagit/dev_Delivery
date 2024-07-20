@@ -35,14 +35,14 @@ export function DashboardNavbar() {
 
   return (
     <Navbar
-      color={fixedNavbar ? "white" : "transparent"}
+      color={fixedNavbar ? "transparent" : "white"}
       className={`rounded-xl transition-all ${
         fixedNavbar
-          ? "sticky top-4 z-40 py-3 shadow-md shadow-blue-gray-500/5"
-          : "px-0 py-1"
+          ? "px-0 py-1"
+          : "sticky top-0 z-40 py-3 shadow-md shadow-blue-gray-500/5"
       }`}
       fullWidth
-      blurred={fixedNavbar}
+      blurred={!fixedNavbar}
     >
       <div className="flex flex-col-reverse justify-between gap-6 md:flex-row md:items-center">
         <div className="capitalize">

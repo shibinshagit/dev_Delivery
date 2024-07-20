@@ -92,34 +92,35 @@ export function Tables() {
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
       <Card>
-        <CardHeader variant="gradient" color="gray" className="mb-8 p-6 flex justify-between items-center">
-          <Typography variant="h6" color="white">
-            Customer Data
-          </Typography>
-          <div className="flex gap-4">
-            <Input
-              type="text"
-              placeholder="Search ..."
-              value={searchTerm}
-              onChange={handleSearch}
-              className="bg-white"
-            />
-            <Menu>
-              <MenuHandler>
-                <Button variant="gradient" color="blue-gray" className="flex items-center gap-2">
-                  <EllipsisVerticalIcon className="h-5 w-5" />
-                  Filter
-                </Button>
-              </MenuHandler>
-              <MenuList>
-                <MenuItem onClick={() => handleFilterChange('All')}>All</MenuItem>
-                <MenuItem onClick={() => handleFilterChange('Active')}>Active</MenuItem>
-                <MenuItem onClick={() => handleFilterChange('Leave')}>Leave</MenuItem>
-                <MenuItem onClick={() => handleFilterChange('Renew')}>Renew</MenuItem>
-              </MenuList>
-            </Menu>
-          </div>
-        </CardHeader>
+      <CardHeader variant="gradient" color="gray" className="mb-8 p-6 flex justify-between items-center">
+  <Typography variant="h6" color="white" className="hidden md:block">
+    Customer Data
+  </Typography>
+  <div className="flex gap-12">
+    <Input
+      type="text"
+      placeholder="Search ..."
+      value={searchTerm}
+      onChange={handleSearch}
+      className="bg-white"
+    />
+    <Menu>
+      <MenuHandler>
+        <Button variant="gradient" color="blue-gray" className="flex items-center gap-2">
+          <EllipsisVerticalIcon className="h-4 w-5" />
+          <span className="hidden md:inline">Filter</span>
+        </Button>
+      </MenuHandler>
+      <MenuList>
+        <MenuItem onClick={() => handleFilterChange('All')}>All</MenuItem>
+        <MenuItem onClick={() => handleFilterChange('Active')}>Active</MenuItem>
+        <MenuItem onClick={() => handleFilterChange('Leave')}>Leave</MenuItem>
+        <MenuItem onClick={() => handleFilterChange('Renew')}>Renew</MenuItem>
+      </MenuList>
+    </Menu>
+  </div>
+</CardHeader>
+
         <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
           <table className="w-full min-w-[640px] table-auto">
             <thead>

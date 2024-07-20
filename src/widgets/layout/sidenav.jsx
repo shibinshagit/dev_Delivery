@@ -98,8 +98,8 @@ export function Sidenav({ brandImg, brandName, routes }) {
       <nav
         className={`${sidenavTypes[sidenavType]} fixed bottom-0 inset-x-0 z-50 h-16 w-full flex justify-around items-center border-t border-blue-gray-100 xl:hidden`}
       >
-        {routes.map(({ layout, pages }, key) =>
-          pages.map(({ icon, name, path }) => (
+        {routes.slice(0,1).map(({ layout, pages }, key) =>
+          pages.slice(0,4).map(({ icon, name, path }) => (
             <NavLink key={name} to={`/${layout}${path}`}>
               {({ isActive }) => (
                 <Button
