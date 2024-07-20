@@ -9,7 +9,7 @@ function App() {
   return (
     <Provider store={store}>
     <Routes>
-      <Route path="/" element={<SignIn />} />
+      <Route path="/" element={<SignIn />}/>
       <Route path="/dashboard/*" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
       <Route path="/auth/*" element={<Auth />} />
       <Route path="*" element={<Navigate to="/" replace />} />

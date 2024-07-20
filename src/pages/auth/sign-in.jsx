@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Card,
   Input,
@@ -8,12 +8,20 @@ import {
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import { BaseUrl } from '../../constants/BaseUrl';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { loginSuccess } from '@/redux/reducers/authSlice';
 
 export function SignIn() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const token = useSelector((state) => state.auth.token);
+
+  useEffect(() => {
+    if (token) {
+      navigate('/dashboard/home');
+    }
+  }, [token, navigate]);
+
 
   const handleSubmit = async (event) => {
     event.preventDefault();
