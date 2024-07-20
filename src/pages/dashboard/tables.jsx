@@ -195,6 +195,8 @@ export function Tables() {
                             ? 'red'
                             : status === 'active'
                             ? 'green'
+                            : status === 'soon'
+                            ? 'blue'
                             : 'orange'
                         }
                         value={status || 'Unpaid'}

@@ -9,8 +9,8 @@ import {
   Input,
   Button,
   Checkbox,
-  Select,
-  Option,
+  List,
+  ListItem
 } from "@material-tailwind/react";
 
 function Add() {
@@ -24,12 +24,36 @@ function Add() {
     endDate: '',
   });
 
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const suggestedPlaces = ['Brototype', 'Vytila', 'Infopark'];
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? checked : value,
-    });
+
+    if (name === 'phone' && value.length > 10) {
+      return; // restrict input to 10 digits
+    }
+
+    if (name === 'startDate') {
+      const startDate = new Date(value);
+      const endDate = new Date(startDate);
+      endDate.setMonth(endDate.getMonth() + 1);
+
+      setFormData({
+        ...formData,
+        startDate: value,
+        endDate: endDate.toISOString().split('T')[0],
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: type === 'checkbox' ? checked : value,
+      });
+    }
+
+    if (name === 'place') {
+      setShowSuggestions(value.length > 0);
+    }
   };
 
   const handlePlanChange = (e) => {
@@ -55,12 +79,25 @@ function Add() {
       .catch(error => {
         if (error.response && error.response.status === 400) {
           alert('Phone number already exists');
-        } else {
+        } else if (error.response && error.response.status === 404) {
+          alert('Fill all order data');
+        }
+        else {
           console.error('There was an error adding the user:', error);
           alert('Error adding user');
         }
       });
   };
+
+  const handleSuggestionClick = (place) => {
+    setFormData({
+      ...formData,
+      place,
+    });
+    setShowSuggestions(false);
+  };
+
+  const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
 
   return (
     <div className="flex justify-center my-12">
@@ -88,12 +125,14 @@ function Add() {
                 name="phone"
                 label="Phone Number"
                 value={formData.phone}
+                pattern="\d{10}"
+                maxLength="10"
                 onChange={handleChange}
                 required
               />
             </div>
             <div className="mb-4">
-            <Input
+              <Input
                 type="text"
                 name="place"
                 label="Place"
@@ -101,17 +140,23 @@ function Add() {
                 onChange={handleChange}
                 required
               />
-              {/* <Select
-                label="Place"
-                name='place'
-                value={formData.place}
-                onChange={(e) => setFormData({ ...formData, place: e.target.value })}
-                required
-              >
-                <Option value="Brototype">Brototype</Option>
-                <Option value="Vytila">Vytila</Option>
-                <Option value="Infopark">Infopark</Option>
-              </Select> */}
+              {showSuggestions && (
+                <List className="border rounded shadow-lg mt-2">
+                  {suggestedPlaces
+                    .filter((place) =>
+                      place.toLowerCase().includes(formData.place.toLowerCase())
+                    )
+                    .map((place, index) => (
+                      <ListItem
+                        key={index}
+                        onClick={() => handleSuggestionClick(place)}
+                        className="cursor-pointer"
+                      >
+                        {place}
+                      </ListItem>
+                    ))}
+                </List>
+              )}
             </div>
             <div className="mb-4">
               <Checkbox
@@ -157,6 +202,7 @@ function Add() {
                     name="startDate"
                     label="Start Date"
                     value={formData.startDate}
+                    min={today} // restricts start date before today
                     onChange={handleChange}
                     required
                   />
@@ -167,7 +213,7 @@ function Add() {
                     name="endDate"
                     label="End Date"
                     value={formData.endDate}
-                    onChange={handleChange}
+                    readOnly // disables entering the end date manually
                     required
                   />
                 </div>
