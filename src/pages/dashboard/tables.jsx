@@ -92,11 +92,11 @@ export function Tables() {
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
       <Card>
-      <CardHeader variant="gradient" color="gray" className="mb-8 p-6 flex justify-between items-center">
+       <CardHeader variant="gradient" color="gray" className="mb-8 p-6 flex justify-between items-center">
   <Typography variant="h6" color="white" className="hidden md:block">
     Customer Data
   </Typography>
-  <div className="flex gap-12">
+  <div className="flex gap-4">
     <Input
       type="text"
       placeholder="Search ..."
