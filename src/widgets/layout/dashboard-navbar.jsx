@@ -46,7 +46,7 @@ export function DashboardNavbar() {
     >
       <div className="flex flex-col-reverse justify-between gap-6 md:flex-row md:items-center">
         <div className="capitalize">
-          <Breadcrumbs
+          {/* <Breadcrumbs
             className={`bg-transparent p-0 transition-all ${
               fixedNavbar ? "mt-1" : ""
             }`}
@@ -67,7 +67,7 @@ export function DashboardNavbar() {
             >
               {page}
             </Typography>
-          </Breadcrumbs>
+          </Breadcrumbs> */}
           <Typography variant="h6" color="blue-gray">
             {page}
           </Typography>
@@ -76,21 +76,20 @@ export function DashboardNavbar() {
           <div className="mr-auto md:mr-4 md:w-56">
             <Input label="Search" />
           </div>
-          <IconButton
+          {/* <IconButton
             variant="text"
             color="blue-gray"
             className="grid xl:hidden"
             onClick={() => setOpenSidenav(dispatch, !openSidenav)}
           >
             <Bars3Icon strokeWidth={3} className="h-6 w-6 text-blue-gray-500" />
-          </IconButton>
-          <Link to="/dashboard/add">
+          </IconButton> */}
+          {/* <Link to="/dashboard/add">
             <Button
               variant="text"
               color="blue-gray"
               className="hidden items-center gap-1 px-4 xl:flex normal-case"
             ><PlusCircleIcon className="h-5 w-5 text-blue-gray-500"/>
-              {/* <UserCircleIcon className="h-5 w-5 text-blue-gray-500" /> */}
               Add User
             </Button>
             <IconButton
@@ -100,7 +99,7 @@ export function DashboardNavbar() {
             >
               <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
             </IconButton>
-          </Link>
+          </Link> */}
           <Menu>
             <MenuHandler>
               <IconButton variant="text" color="blue-gray">
