@@ -7,7 +7,6 @@ import {
 import axios from 'axios';
 import { BaseUrl } from '../constants/BaseUrl';
 import { CookingPot } from "lucide-react";
-
 export const statisticsCardsData = [
   {
     color: "gray",
@@ -55,20 +54,42 @@ export const statisticsCardsData = [
   },
 ];
 
-export const fetchStatistics = async (date) => {
+
+export const fetchStatistics = async (date, customers) => {
   try {
-    const response = await axios.get(`${BaseUrl}/api/statistics?date=${date}`);
-    if (response.status === 200) {
-      const data = response.data;
-      statisticsCardsData[0].value = data.totalOrders;
-      statisticsCardsData[1].value = data.breakfastOrders;
-      statisticsCardsData[2].value = data.lunchOrders;
-      statisticsCardsData[3].value = data.dinnerOrders;
-    } else {
-      throw new Error('Failed to fetch statistics');
-    }
+
+    const filteredCustomers = customers.filter(customer => customer.latestOrder);
+
+ 
+    const countOrdersByPlan = (planType) => {
+      return filteredCustomers.filter(customer =>
+        customer.latestOrder.orderEnd >= date &&
+        customer.latestOrder.status === 'active' &&
+        customer.latestOrder.plan.includes(planType)
+      ).length;
+    };
+
+
+    const statistics = {
+      totalOrders: filteredCustomers.filter(customer =>
+        customer.latestOrder.orderEnd >= date &&
+        customer.latestOrder.status === 'active'
+      ).length,
+      breakfastOrders: countOrdersByPlan('B'),
+      lunchOrders: countOrdersByPlan('L'),
+      dinnerOrders: countOrdersByPlan('D')
+    };
+
+    statisticsCardsData[0].value = statistics.totalOrders;
+    statisticsCardsData[1].value = statistics.breakfastOrders;
+    statisticsCardsData[2].value = statistics.lunchOrders;
+    statisticsCardsData[3].value = statistics.dinnerOrders;
+
   } catch (error) {
     console.error('Error fetching statistics:', error);
     throw error;
   }
 };
+
+
+

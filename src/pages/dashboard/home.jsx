@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import {
   Typography,
   Card,
@@ -24,21 +26,21 @@ import {
   fetchStatistics,
 } from "@/data";
 import { CheckCircleIcon, ClockIcon } from "@heroicons/react/24/solid";
-import { SkeletonContainer, SkeletonImage, SkeletonParagraph, SkeletonSubtitle, SkeletonTitle } from "@/helpers/skeleton";
+import { useSelector } from "react-redux";
 
 export function Home() {
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const customers = useSelector((state) => state.auth.customers)
+  const [date, setDate] = useState(new Date());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
 
   useEffect(() => {
     const updateStatistics = async () => {
       setLoading(true);
       setError("");
       try {
-        await fetchStatistics(date);
-      } catch (err) {
+        await fetchStatistics(date.toISOString().split("T")[0], customers);
+      } catch (err) { 
         setError("Error fetching statistics. Please try again later.");
       } finally {
         setLoading(false);
@@ -48,17 +50,12 @@ export function Home() {
     updateStatistics();
   }, [date]);
 
+  const handleDateChange = (date) => {
+    setDate(date);
+  };
+
   if (loading) {
-    return <>
-     <SkeletonContainer>
-    <SkeletonTitle />
-    <SkeletonSubtitle />
-    <SkeletonParagraph />
-    <SkeletonParagraph />
-    <SkeletonParagraph style={{ width: '75%' }} />
-    <SkeletonImage />
-  </SkeletonContainer>
-  </>;
+    return <p>Loading...</p>;
   }
 
   if (error) {
@@ -67,6 +64,15 @@ export function Home() {
 
   return (
     <div className="mt-12">
+      <div className="mb-4 flex items-center">
+        <DatePicker
+          selected={date}
+          onChange={handleDateChange}
+          dateFormat="yyyy-MM-dd"
+          className="form-control px-3 py-2 border border-blue-gray-300 rounded-md"
+          wrapperClassName="w-full"
+        />
+      </div>
       <div className="mb-12 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4">
         {statisticsCardsData.map(({ icon, title, footer, ...rest }) => (
           <StatisticsCard

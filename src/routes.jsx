@@ -9,6 +9,7 @@ import {
 import { Home, Profile, Tables, Notifications } from "@/pages/dashboard";
 import { SignIn, SignUp } from "@/pages/auth";
 import Add from "./pages/dashboard/add";
+import Edit from "./pages/dashboard/edit";
 
 const icon = {
   className: "w-5 h-5 text-inherit",
@@ -43,8 +44,8 @@ export const routes = [
       },{
         icon: <UserCircleIcon {...icon} />,
         name: "update",
-        path: "/update/:id",
-        element: <Profile />,
+        path: "/edit",
+        element: <Edit />,
       },
     ],
   },

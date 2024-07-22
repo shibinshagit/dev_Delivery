@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { BaseUrl } from '../../constants/BaseUrl';
 import { SkeletonContainer, SkeletonImage, SkeletonParagraph, SkeletonSubtitle, SkeletonTitle } from "@/helpers/skeleton";
 import {
   Card,
@@ -18,37 +16,20 @@ import {
   Button,
 } from "@material-tailwind/react";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
+import { useSelector } from 'react-redux';
 
 export function Tables() {
   const navigate = useNavigate();
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const customers = useSelector((state) => state.auth.customers)
+  console.log('costomer:', customers)
+  const [users, setUsers] = useState(customers);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState('All'); // Default filter
+  const [filter, setFilter] = useState('All');
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  const fetchUsers = async () => {
-    try {
-      const response = await axios.get(`${BaseUrl}/api/users`);
-      if (response.status === 200) {
-        setUsers(response.data);
-      } else {
-        setError('Failed to fetch users');
-      }
-    } catch (error) {
-      console.error('Error fetching users:', error);
-      setError('Error fetching users. Please try again later.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleUpdate = (id) => {
-    navigate(`/dashboard/update/${id}`);
+  const handleUpdate = (user) => {
+    navigate(`/dashboard/edit`, { state: { user } }); 
   };
 
   const handleSearch = (event) => {
@@ -64,7 +45,7 @@ export function Tables() {
     if (filter === 'All') {
       return true; // Show all users if filter is 'All'
     } else {
-      return user.orders.length > 0 && user.orders[user.orders.length - 1].status.toLowerCase() === filter.toLowerCase();
+      return user.latestOrder && user.latestOrder.status.toLowerCase() === filter.toLowerCase();
     }
   }).filter(user =>
     user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -125,7 +106,7 @@ export function Tables() {
           <table className="w-full min-w-[640px] table-auto">
             <thead>
               <tr>
-                {["Name", "Place", "Status", "Expire", ""].map((el) => (
+                {["Name", "Place", "Status", "Expire", `total:${filteredUsers.length}`].map((el) => (
                   <th
                     key={el}
                     className="border-b border-blue-gray-50 py-3 px-5 text-left"
@@ -145,9 +126,11 @@ export function Tables() {
                 const className = `py-3 px-5 ${
                   key === users.length - 1 ? "" : "border-b border-blue-gray-50"
                 }`;
-                const { orders } = user;
-                const lastOrder = orders[orders.length - 1] || {};
-                const { status, orderEnd } = lastOrder;
+                // const { orders } = user;
+                // const lastOrder = orders[orders.length - 1] || {};
+                const { latestOrder = {} } = user;
+                const { status, orderEnd } = latestOrder;
+            
                 const formattedDate = orderEnd ? new Intl.DateTimeFormat('en-GB').format(new Date(orderEnd)) : '';
 
 
@@ -212,7 +195,7 @@ export function Tables() {
                       <Typography
                         as="a"
                         className="text-xs font-semibold text-blue-gray-600"
-                        onClick={() => handleUpdate(user._id)}
+                        onClick={() => handleUpdate(user)}
                       >
                         Edit
                       </Typography>

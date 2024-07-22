@@ -4,17 +4,20 @@ import axios from 'axios';
 
 
 // Thunk for fetching costomers====================================================================================================================================
-export const fetchCostomers = createAsyncThunk(
-    'auth/fetchCostomers',
-    async ({ rejectWithValue }) => {
-      try {
-        const response = await axios.get(`${BaseUrl}/api/users`);
-        return response.data;
-      } catch (error) {
-        return rejectWithValue(error.response.data);
-      }
+export const fetchCostomers =  createAsyncThunk(
+  'auth/fetchCostomers',
+  async (_, { rejectWithValue }) => {
+    console.log('working'); 
+    try {
+      console.log('working1'); 
+      const response = await axios.get(`${BaseUrl}/api/users`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
     }
-  );
+  }
+);
+  
 
 // Thunk for fetching Orders====================================================================================================================================
 
@@ -22,6 +25,7 @@ export const fetchCostomers = createAsyncThunk(
     'auth/fetchOrders',
     async (companyId, { rejectWithValue }) => {
       try {
+        console.log('working2') 
         const response = await axios.get(`${BaseUrl}/company/fetchdata/${companyId}`);
         return response.data;
       } catch (error) {
@@ -32,7 +36,7 @@ export const fetchCostomers = createAsyncThunk(
 
 const userInitialState = {
     token: null,
-    customers: null,
+    customers: [],
     orders: [],
     loading: false,
     error: null
@@ -50,7 +54,7 @@ const authSlice = createSlice({
         },
         logout(state) {
             state.token = null;
-            state.customers = null;
+            state.customers = [];
             state.orders = [];
         },
         setOrders(state, action) {
