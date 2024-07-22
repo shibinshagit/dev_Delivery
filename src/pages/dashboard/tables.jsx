@@ -40,7 +40,7 @@ export function Tables() {
 
   return (
     <div className="mt-3 mb-8 flex flex-col gap-12">
-      <Card>
+      
        {/* <CardHeader variant="gradient" color="gray" className="mb-8 p-6 flex justify-between items-center">
   <Typography variant="h6" color="white" className="hidden md:block">
     Customer Data
@@ -62,12 +62,14 @@ export function Tables() {
           <table className="w-full min-w-[640px] table-auto">
             <thead>
               <tr>
-                {["Name", "Place", "Status", "Expire", `No:${filteredUsers.length}`,<Menu>
+                {[
+  "Name",
+  "Place",
+
+    
+    <Menu key="menu">
       <MenuHandler>
-        <Button variant="gradient" color="black" className="">
-          <EllipsisVerticalIcon className="h-3 w-3" />
-          <span className="hidden md:inline"></span>
-        </Button>
+        <span>Status</span>
       </MenuHandler>
       <MenuList>
         <MenuItem onClick={() => handleFilterChange('All')}>All</MenuItem>
@@ -75,7 +77,10 @@ export function Tables() {
         <MenuItem onClick={() => handleFilterChange('Leave')}>Leave</MenuItem>
         <MenuItem onClick={() => handleFilterChange('Renew')}>Renew</MenuItem>
       </MenuList>
-    </Menu>].map((el) => (
+    </Menu>,
+  "Expire",
+  `T:${filteredUsers.length}`,
+].map((el) => (
                   <th
                     key={el}
                     className="border-b border-blue-gray-50 py-3 px-5 text-left"
@@ -175,7 +180,7 @@ export function Tables() {
             </tbody>
           </table>
         </CardBody>
-      </Card>
+  
     </div>
   );
 }
