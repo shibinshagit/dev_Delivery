@@ -20,7 +20,7 @@ export function Footer({ brandName, brandLink, routes }) {
           </a>{" "}
          
         </Typography>
-        <ul className="flex items-center gap-4">
+        {/* <ul className="flex items-center gap-4">
           {routes.map(({ name, path }) => (
             <li key={name}>
               <Typography
@@ -34,7 +34,7 @@ export function Footer({ brandName, brandLink, routes }) {
               </Typography>
             </li>
           ))}
-        </ul>
+        </ul> */}
       </div>
     </footer>
   );
@@ -42,7 +42,7 @@ export function Footer({ brandName, brandLink, routes }) {
 
 Footer.defaultProps = {
   brandName: "BirdTech Digitals",
-  brandLink: "https://www.creative-tim.com",
+  brandLink: "/",
   routes: [
     { name: "Dev", path: "https://shibinsha.cloud" },
     { name: "About Us", path: "/about" },

@@ -63,16 +63,7 @@ export function Home() {
   }
 
   return (
-    <div className="mt-12">
-      <div className="mb-4 flex items-center">
-        <DatePicker
-          selected={date}
-          onChange={handleDateChange}
-          dateFormat="yyyy-MM-dd"
-          className="form-control px-3 py-2 border border-blue-gray-300 rounded-md"
-          wrapperClassName="w-full"
-        />
-      </div>
+    <div className="mt-9">
       <div className="mb-12 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4">
         {statisticsCardsData.map(({ icon, title, footer, ...rest }) => (
           <StatisticsCard
@@ -90,6 +81,15 @@ export function Home() {
             }
           />
         ))}
+      </div>
+      <div className="mb-9 flex items-center">
+        <DatePicker
+          selected={date}
+          onChange={handleDateChange}
+          dateFormat="yyyy-MM-dd"
+          className="form-control px-3 py-2 border border-blue-gray-300 rounded-md"
+          wrapperClassName="w-full"
+        />
       </div>
     </div>
   );
