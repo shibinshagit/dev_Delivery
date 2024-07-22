@@ -20,7 +20,7 @@ export const statisticsCardsData = [
     },
   },
   {
-    color: "gray",
+    color: "green",
     icon: CookingPot,
     title: "Breakfast Orders",
     value: "0",
@@ -31,8 +31,8 @@ export const statisticsCardsData = [
     },
   },
   {
-    color: "gray",
-    icon: UserPlusIcon,
+    color: "orange",
+    icon: CookingPot,
     title: "Lunch Orders",
     value: "0",
     footer: {
@@ -42,8 +42,8 @@ export const statisticsCardsData = [
     },
   },
   {
-    color: "gray",
-    icon: ChartBarIcon,
+    color: "red",
+    icon: CookingPot,
     title: "Dinner Orders",
     value: "0",
     footer: {
@@ -59,8 +59,6 @@ export const fetchStatistics = async (date, customers) => {
   try {
 
     const filteredCustomers = customers.filter(customer => customer.latestOrder);
-
- 
     const countOrdersByPlan = (planType) => {
       return filteredCustomers.filter(customer =>
         customer.latestOrder.orderEnd >= date &&

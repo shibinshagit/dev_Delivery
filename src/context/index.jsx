@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 export const MaterialTailwind = React.createContext(null);
 MaterialTailwind.displayName = "MaterialTailwindContext";
 
+
 export function reducer(state, action) {
   switch (action.type) {
     case "OPEN_SIDENAV": {
@@ -24,6 +25,9 @@ export function reducer(state, action) {
     case "OPEN_CONFIGURATOR": {
       return { ...state, openConfigurator: action.value };
     }
+    case "SET_SEARCH_TERM": {
+      return { ...state, searchTerm: action.value };
+    }
     default: {
       throw new Error(`Unhandled action type: ${action.type}`);
     }
@@ -38,6 +42,7 @@ export function MaterialTailwindControllerProvider({ children }) {
     transparentNavbar: true,
     fixedNavbar: false,
     openConfigurator: false,
+    searchTerm: "",
   };
 
   const [controller, dispatch] = React.useReducer(reducer, initialState);
@@ -83,3 +88,5 @@ export const setFixedNavbar = (dispatch, value) =>
   dispatch({ type: "FIXED_NAVBAR", value });
 export const setOpenConfigurator = (dispatch, value) =>
   dispatch({ type: "OPEN_CONFIGURATOR", value });
+export const setSearchTerm = (dispatch, value) =>
+  dispatch({ type: "SET_SEARCH_TERM", value });

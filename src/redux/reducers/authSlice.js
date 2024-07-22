@@ -7,7 +7,6 @@ import axios from 'axios';
 export const fetchCostomers =  createAsyncThunk(
   'auth/fetchCostomers',
   async (_, { rejectWithValue }) => {
-    console.log('working'); 
     try {
       console.log('working1'); 
       const response = await axios.get(`${BaseUrl}/api/users`);
@@ -25,7 +24,6 @@ export const fetchCostomers =  createAsyncThunk(
     'auth/fetchOrders',
     async (companyId, { rejectWithValue }) => {
       try {
-        console.log('working2') 
         const response = await axios.get(`${BaseUrl}/company/fetchdata/${companyId}`);
         return response.data;
       } catch (error) {

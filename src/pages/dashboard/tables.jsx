@@ -1,49 +1,30 @@
 import React, { useState, useEffect } from 'react';
+import { useMaterialTailwindController } from '@/context/index'; // Adjust the path accordingly
 import { useNavigate } from 'react-router-dom';
-import { SkeletonContainer, SkeletonImage, SkeletonParagraph, SkeletonSubtitle, SkeletonTitle } from "@/helpers/skeleton";
-import {
-  Card,
-  CardHeader,
-  CardBody,
-  Typography,
-  Avatar,
-  Chip,
-  Input,
-  Menu,
-  MenuHandler,
-  MenuList,
-  MenuItem,
-  Button,
-} from "@material-tailwind/react";
+import { Card, CardHeader, CardBody, Typography, Avatar, Chip, Input, Menu, MenuHandler, MenuList, MenuItem, Button } from "@material-tailwind/react";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { useSelector } from 'react-redux';
 
 export function Tables() {
   const navigate = useNavigate();
-  const customers = useSelector((state) => state.auth.customers)
-  console.log('costomer:', customers)
+  const [controller] = useMaterialTailwindController();
+  const { searchTerm } = controller;
+  const customers = useSelector((state) => state.auth.customers);
   const [users, setUsers] = useState(customers);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState('All');
 
   const handleUpdate = (user) => {
-    navigate(`/dashboard/edit`, { state: { user } }); 
-  };
-
-  const handleSearch = (event) => {
-    setSearchTerm(event.target.value);
+    navigate(`/dashboard/edit`, { state: { user } });
   };
 
   const handleFilterChange = (selectedFilter) => {
     setFilter(selectedFilter);
   };
 
-  // Filtering logic based on selected filter
   const filteredUsers = users.filter(user => {
     if (filter === 'All') {
-      return true; // Show all users if filter is 'All'
+      return true;
     } else {
       return user.latestOrder && user.latestOrder.status.toLowerCase() === filter.toLowerCase();
     }
@@ -53,27 +34,14 @@ export function Tables() {
     user.place.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (loading) {
-    return <>
-     <SkeletonContainer>
-    <SkeletonTitle />
-    <SkeletonSubtitle />
-    <SkeletonParagraph />
-    <SkeletonParagraph />
-    <SkeletonParagraph style={{ width: '75%' }} />
-    <SkeletonImage />
-  </SkeletonContainer>
-    </>;
-  }
-
   if (error) {
     return <p>{error}</p>;
   }
 
   return (
-    <div className="mt-12 mb-8 flex flex-col gap-12">
+    <div className="mt-3 mb-8 flex flex-col gap-12">
       <Card>
-       <CardHeader variant="gradient" color="gray" className="mb-8 p-6 flex justify-between items-center">
+       {/* <CardHeader variant="gradient" color="gray" className="mb-8 p-6 flex justify-between items-center">
   <Typography variant="h6" color="white" className="hidden md:block">
     Customer Data
   </Typography>
@@ -85,11 +53,20 @@ export function Tables() {
       onChange={handleSearch}
       className="bg-white"
     />
-    <Menu>
+   
+  </div>
+</CardHeader> */}
+
+
+        <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
+          <table className="w-full min-w-[640px] table-auto">
+            <thead>
+              <tr>
+                {["Name", "Place", "Status", "Expire", `No:${filteredUsers.length}`,<Menu>
       <MenuHandler>
-        <Button variant="gradient" color="blue-gray" className="flex items-center gap-2">
-          <EllipsisVerticalIcon className="h-4 w-5" />
-          <span className="hidden md:inline">Filter</span>
+        <Button variant="gradient" color="black" className="">
+          <EllipsisVerticalIcon className="h-3 w-3" />
+          <span className="hidden md:inline"></span>
         </Button>
       </MenuHandler>
       <MenuList>
@@ -98,15 +75,7 @@ export function Tables() {
         <MenuItem onClick={() => handleFilterChange('Leave')}>Leave</MenuItem>
         <MenuItem onClick={() => handleFilterChange('Renew')}>Renew</MenuItem>
       </MenuList>
-    </Menu>
-  </div>
-</CardHeader>
-
-        <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
-          <table className="w-full min-w-[640px] table-auto">
-            <thead>
-              <tr>
-                {["Name", "Place", "Status", "Expire", `total:${filteredUsers.length}`].map((el) => (
+    </Menu>].map((el) => (
                   <th
                     key={el}
                     className="border-b border-blue-gray-50 py-3 px-5 text-left"
