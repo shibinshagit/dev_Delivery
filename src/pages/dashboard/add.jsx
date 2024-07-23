@@ -101,8 +101,14 @@ function Add() {
     setShowSuggestions(false);
   };
 
-  const today = new Date().toISOString().split('T')[0]; 
-
+  // const today = new Date().toISOString().split('T')[0]; 
+// ============================================================================================Date change
+  const today = new Date();
+const twentyDaysAgo = new Date(today);
+twentyDaysAgo.setDate(today.getDate() - 20);
+const todayISO = today.toISOString().split('T')[0];
+const twentyDaysAgoISO = twentyDaysAgo.toISOString().split('T')[0];
+// =============================================================================================
   return (
     <div className="flex justify-center my-12">
       <Card className="w-full max-w-lg">
@@ -206,7 +212,8 @@ function Add() {
                     name="startDate"
                     label="Start Date"
                     value={formData.startDate}
-                    min={today} // restricts start date before today
+                    // min={today} 
+                    min={twentyDaysAgoISO} 
                     onChange={handleChange}
                     required
                   />
