@@ -98,16 +98,19 @@ function Edit() {
         if (response.status === 200) {
           dispatch(fetchCostomers());
           alert('User updated successfully');
-        } else {
+        } 
+        else if (response.status === 204) {
+          alert('Fill all order data');
+        }  
+        else {
           alert(response.data.message);
         }
       })
       .catch(error => {
         if (error.response && error.response.status === 400) {
           alert('Phone number already exists');
-        } else if (error.response && error.response.status === 204) {
-          alert('Fill all order data');
-        } else {
+        }
+        else {
           console.error('There was an error updating the user:', error);
           alert('Error updating user');
         }
