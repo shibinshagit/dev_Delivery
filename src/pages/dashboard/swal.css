@@ -1,0 +1,16 @@
+/* customStyles.css */
+.swal2-confirm {
+    background-color: #e74c3c !important; /* Red for Delete */
+    color: white !important;
+  }
+  
+  .swal2-deny {
+    background-color: #f39c12 !important; /* Orange for Trash */
+    color: white !important;
+  }
+  
+  .swal2-cancel {
+    background-color: #95a5a6 !important; /* Grey for Cancel */
+    color: white !important;
+  }
+  

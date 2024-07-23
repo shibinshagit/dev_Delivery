@@ -76,6 +76,15 @@ function Add() {
         if (response.status === 200) {
           dispatch(fetchCostomers());
           alert('User added successfully');
+          setFormData({
+            name: '',
+            phone: '',
+            place: '',
+            plan: [],
+            paymentStatus: false,
+            startDate: '',
+            endDate: ''
+          })
         } else {
           alert(response.data.message);
         }
@@ -105,7 +114,7 @@ function Add() {
 // ============================================================================================Date change
   const today = new Date();
 const twentyDaysAgo = new Date(today);
-twentyDaysAgo.setDate(today.getDate() - 20);
+twentyDaysAgo.setDate(today.getDate() - 25);
 const todayISO = today.toISOString().split('T')[0];
 const twentyDaysAgoISO = twentyDaysAgo.toISOString().split('T')[0];
 // =============================================================================================

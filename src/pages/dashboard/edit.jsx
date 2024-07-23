@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 import { BaseUrl } from '../../constants/BaseUrl';
+import './swal.css';
 import {
   Card,
   CardHeader,
@@ -14,12 +16,13 @@ import {
 } from "@material-tailwind/react";
 import { useDispatch } from 'react-redux';
 import { fetchCostomers } from '@/redux/reducers/authSlice';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 function Edit() {
   const location = useLocation();
   const user = location.state.user || {};
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -125,6 +128,55 @@ function Edit() {
     setIsEditing(false);
   };
 
+  const handleDelete = (e) => {
+    e.preventDefault();
+  
+    Swal.fire({
+      title: 'Select an option',
+      showDenyButton: true,
+      showCancelButton: true,
+      confirmButtonText: 'Delete',
+      denyButtonText: 'Block',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Delete the user
+        axios.delete(`${BaseUrl}/api/deleteUser/${user._id}`)
+          .then(response => {
+            if (response.status === 200) {
+              dispatch(fetchCostomers());
+              Swal.fire('Deleted!', 'User has been deleted.', 'success');
+              navigate('/dashboard/home')
+            } else {
+              Swal.fire('Error!', 'Cannot delete user.', 'error');
+            }
+          })
+          .catch(error => {
+            console.error('Error deleting user:', error);
+            Swal.fire('Error!', 'An error occurred while deleting the user.', 'error');
+          });
+      } else if (result.isDenied) {
+        // Soft delete (trash) the user
+        axios.put(`${BaseUrl}/api/trashUser/${user._id}`)
+          .then(response => {
+            if (response.status === 200) {
+              // dispatch(fetchCostomers());
+              // Swal.fire('Trashed!', 'User has been moved to trash.', 'success');
+              setIsEditing(false);
+
+            } else {
+              Swal.fire('Error!', 'Cannot trash user.', 'error');
+            }
+          })
+          .catch(error => {
+            console.error('Error trashing user:', error);
+            Swal.fire('Error!', 'An error occurred while trashing the user.', 'error');
+          });
+      }
+    });
+  };
+  
+
   const handleSuggestionClick = (place) => {
     setFormData({
       ...formData,
@@ -133,7 +185,13 @@ function Edit() {
     setShowSuggestions(false);
   };
 
-  const today = new Date().toISOString().split('T')[0];
+  // const today = new Date().toISOString().split('T')[0];
+  // ============================================================================================Date change
+const today = new Date();
+const twentyDaysAgo = new Date(today);
+twentyDaysAgo.setDate(today.getDate() - 25);
+const todayISO = today.toISOString().split('T')[0];
+const twentyDaysAgoISO = twentyDaysAgo.toISOString().split('T')[0];
 
   if (!user) {
     return <div>Loading...</div>;
@@ -249,7 +307,7 @@ function Edit() {
                     name="startDate"
                     label="Start Date"
                     value={formData.startDate}
-                    min={today} // restricts start date before today
+                    min={twentyDaysAgoISO} // restricts start date before today
                     onChange={handleChange}
                     required
                     disabled={!isEditing}
@@ -272,6 +330,9 @@ function Edit() {
           <div className="flex justify-end p-6">
             {isEditing ? (
               <>
+                <Button type="button" color="red" className="mr-2" onClick={handleDelete}>
+                  Delete
+                </Button>
                 <Button type="button" color="red" className="mr-2" onClick={handleCancelEdit}>
                   Cancel
                 </Button>
