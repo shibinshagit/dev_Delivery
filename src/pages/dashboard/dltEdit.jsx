@@ -24,10 +24,6 @@ function Edit() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
-  const [showLeaveSection, setShowLeaveSection] = useState(false);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const suggestedPlaces = ['Brototype', 'Vytila', 'Infopark'];
-  const [leaveFormData, setLeaveFormData] = useState({leaveStart: '', leaveEnd: ''});
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -45,32 +41,20 @@ function Edit() {
       return date.toISOString().split('T')[0]; // Format to YYYY-MM-DD
     };
 
-    const latestOrder = user.latestOrder || {};
     setFormData({
       name: user.name || '',
       phone: user.phone || '',
       place: user.place || '',
-      plan: latestOrder.plan || [],
+      plan: user.latestOrder?.plan || [],
       paymentStatus: user.paymentStatus || false,
-      startDate: formatDate(latestOrder.orderStart) || '',
-      endDate: formatDate(latestOrder.orderEnd) || '',
+      startDate: formatDate(user.latestOrder?.orderStart) || '',
+      endDate: formatDate(user.latestOrder?.orderEnd) || '',
     });
-
-    if (latestOrder.leave) {
-      const activeLeave = latestOrder.leave.find(
-        (leave) => new Date(leave.end) > new Date()
-      );
-      if (activeLeave) {
-        setLeaveFormData({
-          leaveStart: formatDate(activeLeave.start),
-          leaveEnd: formatDate(activeLeave.end)
-        });
-      }
-    }
   }, [user]);
 
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const suggestedPlaces = ['Brototype', 'Vytila', 'Infopark'];
 
-// ========================================================================================================
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
@@ -110,35 +94,6 @@ function Edit() {
     });
   };
 
-  const handleSuggestionClick = (place) => {
-    setFormData({
-      ...formData,
-      place,
-    });
-    setShowSuggestions(false);
-  };
-  
-  const handleEditClick = () => {
-    setIsEditing(true);
-  };
-
-  const handleCancelEdit = () => {
-    setIsEditing(false);
-  };
-
-  const handleLeaveClick = () => {
-    setShowLeaveSection(!showLeaveSection);
-  };
-
-  const handleLeaveInputChange = (e) => {
-    const { name, value } = e.target;
-
-    setLeaveFormData((prevFormData) => ({
-      ...prevFormData,
-      [name]: value,
-    }));
-  };
-  // update ========================================================================================================
   const handleSubmit = (e) => {
     e.preventDefault();
     axios.put(`${BaseUrl}/api/updateUser/${user._id}`, formData)
@@ -164,28 +119,18 @@ function Edit() {
         }
       });
   };
-// leave========================================================================================================
-  const handleLeaveSubmit = () => {
-    const { leaveStart, leaveEnd } = leaveFormData;
 
-    axios.post(`${BaseUrl}/api/addLeave/${user.latestOrder._id}`, {
-      leaveStart,
-      leaveEnd
-    })
-      .then(response => {
-        if (response.status === 200) {
-          dispatch(fetchCostomers());
-          alert('Leave updated successfully');
-        } else {
-          alert('Error updating leave');
-        }
-      })
-      .catch(error => {
-        console.error('Error updating leave:', error);
-        alert('Error updating leave');
-      });
+  const handleEditClick = () => {
+    setIsEditing(true);
   };
-// delete========================================================================================================
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+  };
+  const handleLeaveDropdown = () => {
+    // show everything about leave
+  };
+
   const handleDelete = (e) => {
     e.preventDefault();
   
@@ -198,12 +143,13 @@ function Edit() {
       cancelButtonText: 'Cancel'
     }).then((result) => {
       if (result.isConfirmed) {
+        // Delete the user
         axios.delete(`${BaseUrl}/api/deleteUser/${user._id}`)
           .then(response => {
             if (response.status === 200) {
               dispatch(fetchCostomers());
               Swal.fire('Deleted!', 'User has been deleted.', 'success');
-              navigate('/dashboard/home');
+              navigate('/dashboard/home')
             } else {
               Swal.fire('Error!', 'Cannot delete user.', 'error');
             }
@@ -213,10 +159,14 @@ function Edit() {
             Swal.fire('Error!', 'An error occurred while deleting the user.', 'error');
           });
       } else if (result.isDenied) {
+        // Soft delete (trash) the user
         axios.put(`${BaseUrl}/api/trashUser/${user._id}`)
           .then(response => {
             if (response.status === 200) {
+              // dispatch(fetchCostomers());
+              // Swal.fire('Trashed!', 'User has been moved to trash.', 'success');
               setIsEditing(false);
+
             } else {
               Swal.fire('Error!', 'Cannot trash user.', 'error');
             }
@@ -228,20 +178,27 @@ function Edit() {
       }
     });
   };
-  // ========================================================================================================
- 
+  
 
-  const today = new Date();
-  const twentyDaysAgo = new Date(today);
-  twentyDaysAgo.setDate(today.getDate() - 25);
-  const todayISO = today.toISOString().split('T')[0];
-  const twentyDaysAgoISO = twentyDaysAgo.toISOString().split('T')[0];
+  const handleSuggestionClick = (place) => {
+    setFormData({
+      ...formData,
+      place,
+    });
+    setShowSuggestions(false);
+  };
+
+  // const today = new Date().toISOString().split('T')[0];
+  // ============================================================================================Date change
+const today = new Date();
+const twentyDaysAgo = new Date(today);
+twentyDaysAgo.setDate(today.getDate() - 25);
+const todayISO = today.toISOString().split('T')[0];
+const twentyDaysAgoISO = twentyDaysAgo.toISOString().split('T')[0];
 
   if (!user) {
     return <div>Loading...</div>;
   }
-
-  const latestOrder = user.latestOrder || {};
 
   return (
     <div className="flex justify-center my-12">
@@ -305,7 +262,7 @@ function Edit() {
                 </List>
               )}
             </div>
-
+            
             <div className="mb-4">
               <Checkbox
                 name="paymentStatus"
@@ -373,81 +330,32 @@ function Edit() {
                 </div>
               </>
             )}
-            <div className="flex justify-between">
-              {isEditing ? (
-                <>  <Button type="button" color="red" className="mr-2" onClick={handleDelete}>
-                Delete
-              </Button>
-                  <Button type="submit" color="green">
-                    Save
-                  </Button>
-                
-                  <Button color="red" onClick={handleCancelEdit}>
-                    Cancel
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button onClick={handleEditClick}>Edit</Button>
-                  {(latestOrder.status === 'active' || latestOrder.status === 'leave') && (
-                    <Button onClick={handleLeaveClick}>Leave</Button>
-                  )}
-                </>
-              )}
-            </div>
-            {showLeaveSection && (
-              <div className="mt-4">
-                <Typography variant="h6" color="blue-gray" className="mb-2">
-                  Completed Leaves
-                </Typography>
-                {latestOrder.leave?.length > 0 ? (
-                  <List>
-                    {latestOrder.leave.filter(leave => new Date(leave.end) <= new Date()).map((leave, index) => (
-                      <ListItem key={index} className="mb-2">
-                        <Typography>{`Leave Start: ${leave.start}, Leave End: ${leave.end}, No. of Leaves: ${leave.numberOfLeaves}`}</Typography>
-                      </ListItem>
-                    ))}
-                  </List>
-                ) : (
-                  <Typography>No leaves available</Typography>
-                )}
-                <Typography variant="h6" color="blue-gray" className="mt-4 mb-2">
-                  Set Leave
-                </Typography>
-                <div className="mb-4">
-                  <Input
-                    type="date"
-                    name="leaveStart"
-                    label="Leave Start Date"
-                    value={leaveFormData.leaveStart}
-                    onChange={handleLeaveInputChange}
-                    min={todayISO}
-                    max={formData.endDate}
-                    required
-                    disabled={new Date(leaveFormData.leaveStart) < today && new Date(leaveFormData.leaveEnd) > today}
-                  />
-                </div>
-                <div className="mb-4">
-                  <Input
-                    type="date"
-                    name="leaveEnd"
-                    label="Leave End Date"
-                    value={leaveFormData.leaveEnd}
-                    onChange={handleLeaveInputChange}
-                    min={leaveFormData.leaveStart}
-                    max={formData.endDate}
-                    required
-                  />
-                </div>
-                <Button color="blue" onClick={handleLeaveSubmit}>
-                  Submit Leave
-                </Button>
-                <Typography variant="body2" color="blue-gray" className="mt-4">
-                  Total Leaves: {latestOrder.leave?.reduce((sum, leave) => sum + leave.numberOfLeaves, 0) || 0}
-                </Typography>
-              </div>
-            )}
           </CardBody>
+          <div className="flex justify-end p-6">
+            {isEditing ? (
+              <>
+                <Button type="button" color="red" className="mr-2" onClick={handleDelete}>
+                  Delete
+                </Button>
+                {user.latestOrder && (user.latestOrder.status === 'leave' || user.latestOrder.status === 'active') && (
+  <Button type="button" color="yellow" className="mr-2" onClick={handleLeaveDropdown}>
+    Leave
+  </Button>
+)}
+
+                <Button type="button" color="red" className="mr-2" onClick={handleCancelEdit}>
+                  Cancel
+                </Button>
+                <Button type="submit" color="green">
+                  Submit
+                </Button>
+              </>
+            ) : (
+              <Button type="button" color="blue" onClick={handleEditClick}>
+                Edit
+              </Button>
+            )}
+          </div>
         </form>
       </Card>
     </div>

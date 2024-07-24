@@ -26,9 +26,14 @@ import {
   fetchStatistics,
 } from "@/data";
 import { CheckCircleIcon, ClockIcon } from "@heroicons/react/24/solid";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { RefreshCcw } from "lucide-react";
+import { fetchCostomers } from "@/redux/reducers/authSlice";
+import { useNavigate } from "react-router-dom";
 
 export function Home() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const customers = useSelector((state) => state.auth.customers)
   const [date, setDate] = useState(new Date());
   const [loading, setLoading] = useState(true);
@@ -52,6 +57,12 @@ export function Home() {
 
   const handleDateChange = (date) => {
     setDate(date);
+  };
+  const handleRefresh = () => {
+   console.log('hello')
+   dispatch(fetchCostomers());
+   navigate('/')
+   nav
   };
 
   if (loading) {
@@ -83,6 +94,7 @@ export function Home() {
         ))}
       </div>
       <div className="mb-9 flex items-center">
+      <RefreshCcw onClick={handleRefresh}/>
         <DatePicker
           selected={date}
           onChange={handleDateChange}

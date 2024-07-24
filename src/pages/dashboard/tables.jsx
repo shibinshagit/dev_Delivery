@@ -76,6 +76,7 @@ export function Tables() {
         <MenuItem onClick={() => handleFilterChange('Active')}>Active</MenuItem>
         <MenuItem onClick={() => handleFilterChange('Leave')}>Leave</MenuItem>
         <MenuItem onClick={() => handleFilterChange('Renew')}>Renew</MenuItem>
+        <MenuItem onClick={() => handleFilterChange('Soon')}>Soon</MenuItem>
       </MenuList>
     </Menu>,
   "Expire",

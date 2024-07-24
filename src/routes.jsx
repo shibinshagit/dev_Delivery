@@ -10,6 +10,7 @@ import { Home, Profile, Tables, UpcomingDelivery } from "@/pages/dashboard";
 import { SignIn, SignUp } from "@/pages/auth";
 import Add from "./pages/dashboard/add";
 import Edit from "./pages/dashboard/edit";
+import LeaveForm from "./pages/dashboard/leave";
 
 const icon = {
   className: "w-5 h-5 text-inherit",
@@ -46,6 +47,11 @@ export const routes = [
         name: "update",
         path: "/edit",
         element: <Edit />,
+      },{
+        icon: <UserCircleIcon {...icon} />,
+        name: "leave",
+        path: "/leave",
+        element: <LeaveForm />,
       },
     ],
   },
