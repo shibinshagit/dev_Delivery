@@ -40,7 +40,7 @@ function Add() {
     if (name === 'startDate') {
       const startDate = new Date(value);
       const endDate = new Date(startDate);
-      endDate.setDate(endDate.getDate() + 30);
+      endDate.setDate(endDate.getDate() + 29);
 
       setFormData({
         ...formData,
