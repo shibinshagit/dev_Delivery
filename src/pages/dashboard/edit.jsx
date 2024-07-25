@@ -81,7 +81,7 @@ function Edit() {
     if (name === 'startDate') {
       const startDate = new Date(value);
       const endDate = new Date(startDate);
-      endDate.setMonth(endDate.getMonth() + 1);
+      endDate.setDate(endDate.getDate() + 30);
 
       setFormData({
         ...formData,
@@ -233,7 +233,9 @@ function Edit() {
 
   const today = new Date();
   const twentyDaysAgo = new Date(today);
-  twentyDaysAgo.setDate(today.getDate() - 25);
+  const tommorrow = new Date(today);
+  tommorrow.setDate(today.getDate() + 1);
+  twentyDaysAgo.setDate(today.getDate() - 29);
   const todayISO = today.toISOString().split('T')[0];
   const twentyDaysAgoISO = twentyDaysAgo.toISOString().split('T')[0];
 
@@ -421,7 +423,7 @@ function Edit() {
                     label="Leave Start Date"
                     value={leaveFormData.leaveStart}
                     onChange={handleLeaveInputChange}
-                    min={todayISO}
+                    min={tommorrow}
                     max={formData.endDate}
                     required
                     disabled={new Date(leaveFormData.leaveStart) < today && new Date(leaveFormData.leaveEnd) > today}

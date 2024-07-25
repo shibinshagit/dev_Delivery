@@ -40,7 +40,7 @@ function Add() {
     if (name === 'startDate') {
       const startDate = new Date(value);
       const endDate = new Date(startDate);
-      endDate.setMonth(endDate.getMonth() + 1);
+      endDate.setDate(endDate.getDate() + 30);
 
       setFormData({
         ...formData,
@@ -114,7 +114,7 @@ function Add() {
 // ============================================================================================Date change
   const today = new Date();
 const twentyDaysAgo = new Date(today);
-twentyDaysAgo.setDate(today.getDate() - 25);
+twentyDaysAgo.setDate(today.getDate() - 29);
 const todayISO = today.toISOString().split('T')[0];
 const twentyDaysAgoISO = twentyDaysAgo.toISOString().split('T')[0];
 // =============================================================================================

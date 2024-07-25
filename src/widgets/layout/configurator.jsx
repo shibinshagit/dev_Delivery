@@ -92,7 +92,7 @@ dispatch(logout())
         </IconButton>
       </div>
       <div className="py-4 px-6">
-        <div className="mb-12">
+        {/* <div className="mb-12">
           <Typography variant="h6" color="blue-gray">
             Sidenav Colors
           </Typography>
@@ -109,7 +109,7 @@ dispatch(logout())
               />
             ))}
           </div>
-        </div>
+        </div> */}
         <div className="mb-12">
           <Typography variant="h6" color="blue-gray">
             Sidenav Types

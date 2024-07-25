@@ -25,7 +25,7 @@ export function UpcomingDelivery() {
             className="w-64 h-64 object-cover"
           />
           <Typography variant="h6" color="blue-gray">
-            upcoming deliveries.
+            {/* upcoming deliveries. */}
           </Typography>
         </CardBody>
       </Card>
