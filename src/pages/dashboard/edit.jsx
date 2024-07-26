@@ -79,9 +79,15 @@ function Edit() {
     }
 
     if (name === 'startDate') {
-      const startDate = new Date(value);
+      // const startDate = new Date(value);
+      // const endDate = new Date(startDate);
+      // endDate.setDate(endDate.getDate() + 29);
+      const startDate = new Date(value); 
       const endDate = new Date(startDate);
-      endDate.setDate(endDate.getDate() + 29);
+      endDate.setMonth(startDate.getMonth() + 1);
+      if (endDate.getDate() !== startDate.getDate()) {
+      endDate.setDate(0)}
+      endDate.setDate(endDate.getDate() - 1);
 
       setFormData({
         ...formData,
