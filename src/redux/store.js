@@ -4,7 +4,7 @@ import storage from 'redux-persist/lib/storage'
 import rootReducer from './rootReducers'
 
 const persistConfig = {
-    key: 'root',
+    key: 'eduzell',
     storage,
     whitelist: ['auth']
 }
