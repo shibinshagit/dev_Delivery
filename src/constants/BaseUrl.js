@@ -1,2 +1,2 @@
-export const BaseUrl = 'https://bismimessomsserver.onrender.com';
+export const BaseUrl = 'https://eduzellserver.onrender.com';
 // export const BaseUrl = 'http://localhost:3000';
