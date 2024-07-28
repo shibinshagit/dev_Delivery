@@ -5,12 +5,16 @@ import {
   InformationCircleIcon,
   ServerStackIcon,
   RectangleStackIcon,
+  ChatBubbleOvalLeftIcon,
+  IdentificationIcon,
 } from "@heroicons/react/24/solid";
 import { Home, Profile, Tables, UpcomingDelivery } from "@/pages/dashboard";
 import { SignIn, SignUp } from "@/pages/auth";
 import Add from "./pages/dashboard/add";
 import Edit from "./pages/dashboard/edit";
 import LeaveForm from "./pages/dashboard/leave";
+import PasswordOtp from "./pages/auth/enter-password";
+import CreatePassword from "./pages/auth/create-password";
 
 const icon = {
   className: "w-5 h-5 text-inherit",
@@ -21,26 +25,27 @@ export const routes = [
     layout: "dashboard",
     pages: [
       {
-        icon: <HomeIcon {...icon} />,
-        name: "dashboard",
+        icon: <RectangleStackIcon {...icon} />,
+        name: "Jobs",
         path: "/home",
         element: <Home />,
       },
       {
-        icon: <TableCellsIcon {...icon} />,
-        name: "users",
-        path: "/tables",
-        element: <Tables />,
-      },{
-        icon: <UserCircleIcon {...icon} />,
-        name: "add",
-        path: "/add",
+        icon: <ChatBubbleOvalLeftIcon {...icon} />,
+        name: "Chat",
+        path: "/chat",
         element: <Add />,
       },
       {
-        icon: <InformationCircleIcon {...icon} />,
-        name: "delivery",
-        path: "/delivery",
+        icon: <TableCellsIcon {...icon} />,
+        name: "Progress",
+        path: "/progress",
+        element: <Tables />,
+      },
+      {
+        icon: <IdentificationIcon {...icon} />,
+        name: "Profile",
+        path: "/profile",
         element: <UpcomingDelivery />,
       },{
         icon: <UserCircleIcon {...icon} />,
@@ -71,6 +76,18 @@ export const routes = [
         path: "/sign-up",
         element: <SignUp />,
       },
+      {
+        icon: <RectangleStackIcon {...icon} />,
+        name: "password otp",
+        path: "/otp-password",
+        element: <PasswordOtp />,
+      },
+      {
+        icon: <RectangleStackIcon {...icon} />,
+        name: "create password",
+        path: "/create-password",
+        element: <CreatePassword />,
+      }
     ],
   },
 ];

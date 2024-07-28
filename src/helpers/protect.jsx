@@ -9,19 +9,19 @@ const PrivateRoute = ({ children }) => {
   if (!token) {
     return <Navigate to="/" replace />;
   }
+  return children;
+  // try {
+  //   const decodedToken = jwtDecode(token);
+  //   const userEmail = decodedToken.email;
 
-  try {
-    const decodedToken = jwtDecode(token);
-    const userEmail = decodedToken.email;
+  //   if (userEmail !== 'admin050@gmail.com') {
+  //     return <Navigate to="/" replace />;
+  //   }
 
-    if (userEmail !== 'admin050@gmail.com') {
-      return <Navigate to="/" replace />;
-    }
-
-    return children;
-  } catch (error) {
-    return <Navigate to="/" replace />;
-  }
+ 
+  // } catch (error) {
+  //   return <Navigate to="/" replace />;
+  // }
 };
 
 export default PrivateRoute;

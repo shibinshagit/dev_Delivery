@@ -1,17 +1,35 @@
-import {
-  Card,
-  Input,
-  Checkbox,
-  Button,
-  Typography,
-} from "@material-tailwind/react";
-import { Link } from "react-router-dom";
-
+import React, { useState } from 'react';
+import { Card, Input, Checkbox, Button, Typography } from "@material-tailwind/react";
+import { Link, useNavigate } from "react-router-dom";
+import axios from 'axios';
+import { BaseUrl } from '@/constants/BaseUrl';
 
 export function SignUp() {
+  const [email, setEmail] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const navigate = useNavigate();
+
+  const handleEmailSubmit = async (e) => {
+    e.preventDefault();
+    if (!termsAccepted) {
+      alert("You must accept the Terms and Conditions");
+      return;
+    }
+    try {
+      const response = await axios.post(`${BaseUrl}/api/check-email`, { email });
+      if (response.data.exists) {
+        navigate('/auth/otp-password', { state: { email, isPassword: true } });
+      } else {
+        navigate('/auth/otp-password', { state: { email, isPassword: false } });
+      }
+    } catch (error) {
+      console.error('Error checking email', error);
+    }
+  };
+
   return (
     <section className="m-8 flex">
-            <div className="w-2/5 h-full hidden lg:block">
+      <div className="w-2/5 h-full hidden lg:block">
         <img
           src="/img/pattern.png"
           className="h-full w-full object-cover rounded-3xl"
@@ -20,9 +38,8 @@ export function SignUp() {
       <div className="w-full lg:w-3/5 flex flex-col items-center justify-center">
         <div className="text-center">
           <Typography variant="h2" className="font-bold mb-4">Join Us Today</Typography>
-          <Typography variant="paragraph" color="blue-gray" className="text-lg font-normal">Enter your email and password to register.</Typography>
         </div>
-        <form className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2">
+        <form className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2" onSubmit={handleEmailSubmit}>
           <div className="mb-1 flex flex-col gap-6">
             <Typography variant="small" color="blue-gray" className="-mb-3 font-medium">
               Your email
@@ -30,10 +47,12 @@ export function SignUp() {
             <Input
               size="lg"
               placeholder="name@mail.com"
-              className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
+              className="!border-t-blue-gray-200 focus:!border-t-gray-900"
               labelProps={{
                 className: "before:content-none after:content-none",
               }}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
           <Checkbox
@@ -43,7 +62,7 @@ export function SignUp() {
                 color="gray"
                 className="flex items-center justify-start font-medium"
               >
-                I agree the&nbsp;
+                I agree to the&nbsp;
                 <a
                   href="#"
                   className="font-normal text-black transition-colors hover:text-gray-900 underline"
@@ -53,11 +72,12 @@ export function SignUp() {
               </Typography>
             }
             containerProps={{ className: "-ml-2.5" }}
+            checked={termsAccepted}
+            onChange={(e) => setTermsAccepted(e.target.checked)}
           />
-          <Button className="mt-6" fullWidth>
+          <Button className="mt-6" fullWidth type="submit">
             Register Now
           </Button>
-
           <div className="space-y-4 mt-8">
             <Button size="lg" color="white" className="flex items-center gap-2 justify-center shadow-md" fullWidth>
               <svg width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -75,17 +95,12 @@ export function SignUp() {
               </svg>
               <span>Sign in With Google</span>
             </Button>
-            <Button size="lg" color="white" className="flex items-center gap-2 justify-center shadow-md" fullWidth>
-              <img src="/img/twitter-logo.svg" height={24} width={24} alt="" />
-              <span>Sign in With Twitter</span>
-            </Button>
           </div>
           <Typography variant="paragraph" className="text-center text-blue-gray-500 font-medium mt-4">
             Already have an account?
             <Link to="/auth/sign-in" className="text-gray-900 ml-1">Sign in</Link>
           </Typography>
         </form>
-
       </div>
     </section>
   );
