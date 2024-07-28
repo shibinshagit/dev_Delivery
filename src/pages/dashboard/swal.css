@@ -13,4 +13,32 @@
     background-color: #95a5a6 !important; /* Grey for Cancel */
     color: white !important;
   }
+
+
+  /* shimmer.css */
+.shimmer-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.shimmer-card {
+  background: #f6f7f8;
+  background-image: linear-gradient(to right, #eeeeee 0%, #dddddd 50%, #eeeeee 100%);
+  background-repeat: no-repeat;
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  height: 200px; /* Adjust the height as needed */
+  border-radius: 0.5rem;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
   

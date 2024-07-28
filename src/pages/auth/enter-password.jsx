@@ -13,43 +13,48 @@ export function OTPPass() {
   const [otp, setOtp] = useState(['', '', '', '']);
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleOTPChange = (index, value) => {
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
+
+    // Automatically move to the next input
+    if (value && index < otp.length - 1) {
+      document.getElementById(`otp-input-${index + 1}`).focus();
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isPassword) {
-      try {
+    setLoading(true);
+    setError('');
+    
+    try {
+      if (isPassword) {
         const response = await axios.post(`${BaseUrl}/api/verify-password`, { email, password });
-       
-      if (response.status === 200) {
-        const { token } = response.data;
-        // dispatch(fetchCostomers());
-        dispatch(loginSuccess({ token }));
-        alert('Login successful');
-        navigate('/dashboard/home');
-      }  else {
-          console.error('Password verification failed');
+        if (response.status === 200) {
+          const { token } = response.data;
+          dispatch(loginSuccess({ token }));
+          navigate('/dashboard/home');
+        } else {
+          setError('Password verification failed. Please try again.');
         }
-      } catch (error) {
-        console.error('Error verifying password', error);
-      }
-    } else {
-      try {
+      } else {
         const response = await axios.post(`${BaseUrl}/api/verify-otp`, { email, otp: otp.join('') });
         if (response.data.success) {
           navigate('/auth/create-password', { state: { email } });
         } else {
-          console.error('OTP verification failed');
+          setError('OTP verification failed. Please check your OTP and try again.');
         }
-      } catch (error) {
-        console.error('Error verifying OTP', error);
       }
+    } catch (error) {
+      setError('An error occurred. Please try again later.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -57,10 +62,11 @@ export function OTPPass() {
     <section className="m-8 flex flex-col items-center justify-center">
       <div className="text-center">
         <Typography variant="h2" className="font-bold mb-4">
-          {isPassword ? 'Enter Password' : 'Enter OTP'}
+          {isPassword ? 'Welcome Back!' : 'Enter OTP'}
         </Typography>
       </div>
       <form className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2" onSubmit={handleSubmit}>
+        {error && <div className="text-red-500 text-center mb-4">{error}</div>}
         <div className="mb-4 flex flex-col gap-6">
           {isPassword ? (
             <>
@@ -78,7 +84,7 @@ export function OTPPass() {
                   className: "before:content-none after:content-none",
                 }}
               />
-              <div className="flex items-center justify-start">
+              <div className="flex items-center justify-start mt-2">
                 <input
                   type="checkbox"
                   checked={showPassword}
@@ -90,26 +96,31 @@ export function OTPPass() {
               </div>
             </>
           ) : (
-            <div className="flex gap-2">
-              {otp.map((digit, index) => (
-                <Input
-                  key={index}
-                  size="lg"
-                  placeholder="-"
+            <div className="flex gap-2 justify-center">
+            {otp.map((digit, index) => (
+              <div
+                key={index}
+                className="relative flex items-center justify-center w-12 h-12 border border-gray-300 rounded-lg bg-white"
+              >
+                <input
+                  id={`otp-input-${index}`}
+                  type="text"
                   value={digit}
                   onChange={(e) => handleOTPChange(index, e.target.value)}
-                  className="!border-t-blue-gray-200 focus:!border-t-gray-900 text-center"
+                  className="w-full h-full text-center border-none focus:ring-0"
                   maxLength={1}
-                  labelProps={{
-                    className: "before:content-none after:content-none",
-                  }}
+                  placeholder="-"
+                  aria-label={`OTP digit ${index + 1}`}
                 />
-              ))}
-            </div>
+              </div>
+            ))}
+          </div>
+          
+          
           )}
         </div>
-        <Button className="mt-6" fullWidth type="submit">
-          {isPassword ? 'Login' : 'Verify OTP'}
+        <Button className="mt-6" fullWidth type="submit" disabled={loading}>
+          {loading ? 'Processing...' : (isPassword ? 'Login' : 'Verify OTP')}
         </Button>
       </form>
     </section>
