@@ -14,7 +14,7 @@ const PrivateRoute = ({ children }) => {
     const decodedToken = jwtDecode(token);
     const userEmail = decodedToken.email;
 
-    if (userEmail !== 'admin060@gmail.com') {
+    if (userEmail !== 'admin050@gmail.com') {
       return <Navigate to="/" replace />;
     }
 
