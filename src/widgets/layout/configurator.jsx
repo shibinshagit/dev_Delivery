@@ -77,10 +77,10 @@ dispatch(logout())
       <div className="flex items-start justify-between px-6 pt-8 pb-6">
         <div>
           <Typography variant="h5" color="blue-gray">
-            Dashboard Configurator
+            Eduzell Configurator
           </Typography>
           <Typography className="font-normal text-blue-gray-600">
-            Bismimess OMS.
+            Eduzell Portal.
           </Typography>
         </div>
         <IconButton
@@ -112,29 +112,29 @@ dispatch(logout())
         </div> */}
         <div className="mb-12">
           <Typography variant="h6" color="blue-gray">
-            Sidenav Types
+            
           </Typography>
           <Typography variant="small" color="gray">
-            Choose between 3 different sidenav types.
+           
           </Typography>
           <div className="mt-3 flex items-center gap-2">
             <Button
               variant={sidenavType === "dark" ? "gradient" : "outlined"}
               onClick={() => setSidenavType(dispatcher, "dark")}
             >
-              Dark
+              top10Ai
             </Button>
             <Button
               variant={sidenavType === "transparent" ? "gradient" : "outlined"}
               onClick={() => setSidenavType(dispatcher, "transparent")}
             >
-              Transparent
+              code Q
             </Button>
             <Button
               variant={sidenavType === "white" ? "gradient" : "outlined"}
               onClick={() => setSidenavType(dispatcher, "white")}
             >
-              White
+              portal
             </Button>
           </div>
         </div>
@@ -142,7 +142,7 @@ dispatch(logout())
           <hr />
           <div className="flex items-center justify-between py-5">
             <Typography variant="h6" color="blue-gray">
-              Navbar Fixed
+              Company
             </Typography>
             <Switch
               id="navbar-fixed"

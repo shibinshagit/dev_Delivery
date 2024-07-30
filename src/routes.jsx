@@ -34,7 +34,7 @@ export const routes = [
         icon: <ChatBubbleOvalLeftIcon {...icon} />,
         name: "Chat",
         path: "/chat",
-        element: <Add />,
+        element: <UpcomingDelivery />,
       },
       {
         icon: <TableCellsIcon {...icon} />,

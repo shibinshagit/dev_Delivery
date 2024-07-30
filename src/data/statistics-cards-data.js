@@ -1,93 +1,62 @@
 import {
-  BanknotesIcon,
-  UserPlusIcon,
   UsersIcon,
-  ChartBarIcon,
 } from "@heroicons/react/24/solid";
-import axios from 'axios';
-import { BaseUrl } from '../constants/BaseUrl';
-import { CookingPot } from "lucide-react";
+
+// Sample hardcoded job data
 export const statisticsCardsData = [
   {
-    color: "gray",
+    color: "blue",
     icon: UsersIcon,
-    title: "Total Orders",
-    value: "0",
-    footer: {
-      color: "",
-      value: "",
-      label: "",
-    },
+    title: "Software Developer",
+    value: "ABC Corp",
+    description: "Develop and maintain web applications.",
+    location: "Kochi",
+    salary: "₹500,000 - ₹700,000",
+    type: "Full-time",
+    url: "https://www.indeed.com/viewjob?jk=1234567890",
   },
   {
-    color: "green",
-    icon: CookingPot,
-    title: "Breakfast Orders",
-    value: "0",
-    footer: {
-      color: "",
-      value: "",
-      label: "",
-    },
+    color: "blue",
+    icon: UsersIcon,
+    title: "Frontend Engineer",
+    value: "XYZ Ltd",
+    description: "Create user-friendly web interfaces.",
+    location: "Kochi",
+    salary: "₹600,000 - ₹800,000",
+    type: "Full-time",
+    url: "https://www.indeed.com/viewjob?jk=0987654321",
   },
   {
-    color: "orange",
-    icon: CookingPot,
-    title: "Lunch Orders",
-    value: "0",
-    footer: {
-      color: "",
-      value: "",
-      label: "",
-    },
+    color: "blue",
+    icon: UsersIcon,
+    title: "Backend Developer",
+    value: "Tech Solutions",
+    description: "Build and manage backend services.",
+    location: "Kochi",
+    salary: "₹550,000 - ₹750,000",
+    type: "Full-time",
+    url: "https://www.indeed.com/viewjob?jk=1122334455",
   },
   {
-    color: "red",
-    icon: CookingPot,
-    title: "Dinner Orders",
-    value: "0",
-    footer: {
-      color: "",
-      value: "",
-      label: "",
-    },
+    color: "blue",
+    icon: UsersIcon,
+    title: "Full Stack Developer",
+    value: "Innovatech",
+    description: "Work on both frontend and backend systems.",
+    location: "Kochi",
+    salary: "₹650,000 - ₹900,000",
+    type: "Full-time",
+    url: "https://www.indeed.com/viewjob?jk=2233445566",
+  },
+  {
+    color: "blue",
+    icon: UsersIcon,
+    title: "DevOps Engineer",
+    value: "CloudWorks",
+    description: "Manage and automate infrastructure.",
+    location: "Kochi",
+    salary: "₹700,000 - ₹950,000",
+    type: "Full-time",
+    url: "https://www.indeed.com/viewjob?jk=3344556677",
   },
 ];
-
-
-export const fetchStatistics = async (date, customers) => {
-  try {
-
-    const filteredCustomers = customers.filter(customer => customer.latestOrder);
-    const countOrdersByPlan = (planType) => {
-      return filteredCustomers.filter(customer =>
-        customer.latestOrder.orderEnd >= date &&
-        customer.latestOrder.status === 'active' &&
-        customer.latestOrder.plan.includes(planType)
-      ).length;
-    };
-
-
-    const statistics = {
-      totalOrders: filteredCustomers.filter(customer =>
-        customer.latestOrder.orderEnd >= date &&
-        customer.latestOrder.status === 'active'
-      ).length,
-      breakfastOrders: countOrdersByPlan('B'),
-      lunchOrders: countOrdersByPlan('L'),
-      dinnerOrders: countOrdersByPlan('D')
-    };
-
-    statisticsCardsData[0].value = statistics.totalOrders;
-    statisticsCardsData[1].value = statistics.breakfastOrders;
-    statisticsCardsData[2].value = statistics.lunchOrders;
-    statisticsCardsData[3].value = statistics.dinnerOrders;
-
-  } catch (error) {
-    console.error('Error fetching statistics:', error);
-    throw error;
-  }
-};
-
-
-

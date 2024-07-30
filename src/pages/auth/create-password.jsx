@@ -40,50 +40,55 @@ export function CreatePassword() {
   };
 
   return (
-    <section className="m-8 flex flex-col items-center justify-center">
-      <div className="text-center">
+    <section className="m-6 flex flex-col items-center justify-center">
+      
+      <div className="flex justify-center items-center w-full min-h-screen py-6">
+        
+  <form className="w-full sm:w-80 max-w-screen-lg lg:w-1/2 flex flex-col items-center" onSubmit={handleSubmit}>
+  <div className="text-center">
         <Typography variant="h2" className="font-bold mb-4">Create Password</Typography>
       </div>
-      <form className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2" onSubmit={handleSubmit}>
-        <div className="mb-4 flex flex-col gap-6">
-          <Typography variant="small" color="blue-gray" className="-mb-3 font-medium">
-            Password
-          </Typography>
-          <Input
-            type="password"
-            size="lg"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="!border-t-blue-gray-200 focus:!border-t-gray-900"
-            labelProps={{
-              className: "before:content-none after:content-none",
-            }}
-          />
-          <Typography variant="small" color="blue-gray" className="-mb-3 font-medium">
-            Confirm Password
-          </Typography>
-          <Input
-            type="password"
-            size="lg"
-            placeholder="Confirm your password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className="!border-t-blue-gray-200 focus:!border-t-gray-900"
-            labelProps={{
-              className: "before:content-none after:content-none",
-            }}
-          />
-          {error && (
-            <Typography variant="small" color="red" className="mt-2">
-              {error}
-            </Typography>
-          )}
-        </div>
-        <Button className="mt-6" fullWidth type="submit">
-          Create Password
-        </Button>
-      </form>
+    <div className="mb-4 flex flex-col gap-6 w-full">
+      <Typography variant="small" color="blue-gray" className="-mb-3 font-medium">
+        Password
+      </Typography>
+      <Input
+        type="password"
+        size="lg"
+        placeholder="Enter your password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        className="!border-t-blue-gray-200 focus:!border-t-gray-900"
+        labelProps={{
+          className: "before:content-none after:content-none",
+        }}
+      />
+      <Typography variant="small" color="blue-gray" className="-mb-3 font-medium">
+        Confirm Password
+      </Typography>
+      <Input
+        type="password"
+        size="lg"
+        placeholder="Confirm your password"
+        value={confirmPassword}
+        onChange={(e) => setConfirmPassword(e.target.value)}
+        className="!border-t-blue-gray-200 focus:!border-t-gray-900"
+        labelProps={{
+          className: "before:content-none after:content-none",
+        }}
+      />
+      {error && (
+        <Typography variant="small" color="red" className="mt-2">
+          {error}
+        </Typography>
+      )}
+    </div>
+    <Button className="mt-6" fullWidth type="submit">
+      Create Password
+    </Button>
+  </form>
+</div>
+
     </section>
   );
 }

@@ -29,12 +29,12 @@ export function SignUp() {
 
   return (
     <section className="mx-2 flex">
-      <div className="w-2/5 h-full hidden lg:block">
+      {/* <div className="w-2/5 h-full hidden lg:block">
         <img
           src="/img/pattern.png"
           className="h-full w-full object-cover rounded-3xl"
         />
-      </div>
+      </div> */}
       <div className="flex justify-center items-center w-full min-h-screen py-6">
   <div className="w-full sm:w-4/5 md:w-3/5 lg:w-3/5 flex flex-col items-center justify-center">
     <div className="text-center">

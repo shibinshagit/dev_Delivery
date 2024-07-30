@@ -1,82 +1,55 @@
 import React, { useState, useEffect } from "react";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 import {
   Typography,
-  Card,
-  CardHeader,
-  CardBody,
-  IconButton,
-  Menu,
-  MenuHandler,
-  MenuList,
-  MenuItem,
-  Avatar,
-  Tooltip,
-  Progress,
 } from "@material-tailwind/react";
-import {
-  EllipsisVerticalIcon,
-  ArrowUpIcon,
-} from "@heroicons/react/24/outline";
 import { StatisticsCard } from "@/widgets/cards";
-import { StatisticsChart } from "@/widgets/charts";
-import {
-  statisticsCardsData,
-  fetchStatistics,
-} from "@/data";
-import { CheckCircleIcon, ClockIcon } from "@heroicons/react/24/solid";
-import { useDispatch, useSelector } from "react-redux";
-import { RefreshCcw } from "lucide-react";
-import { fetchCostomers } from "@/redux/reducers/authSlice";
-import { useNavigate } from "react-router-dom";
+import { statisticsCardsData } from "@/data";
+import { useMaterialTailwindController } from "@/context";
+// import { fetchStatistics } from "@/data";
 
 export function Home() {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const customers = useSelector((state) => state.auth.customers)
-  const [date, setDate] = useState(new Date());
+  // const [statisticsCardsData, setStatisticsCardsData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [controller] = useMaterialTailwindController();
+  const {searchTerm}= controller
+
+  const filteredUsers = statisticsCardsData.filter(user =>
+    user.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.value.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+
 
   useEffect(() => {
-    const updateStatistics = async () => {
-      setLoading(true);
-      setError("");
-      try {
-        await fetchStatistics(date.toISOString().split("T")[0], customers);
-      } catch (err) { 
-        setError("Error fetching statistics. Please try again later.");
-      } finally {
+    // const fetchData = async () => {
+    //   try {
+    //     const data = await fetchStatistics();
+        // setStatisticsCardsData(statisticsCardsData);
+    //     setLoading(false);
+    //   } catch (error) {
+    //     setError("Failed to load job data.");
         setLoading(false);
-      }
-    };
+    //   }
+    // };
 
-    updateStatistics();
-  }, [date]);
-
-  const handleDateChange = (date) => {
-    setDate(date);
-  };
-  const handleRefresh = () => {
-   console.log('hello')
-   dispatch(fetchCostomers());
-   navigate('/')
-   nav
-  };
+    // fetchData();
+  }, [statisticsCardsData]);
 
   if (loading) {
-    return  <div className="grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4 mt-9">
-    {[1, 2, 3, 4, 5, 6, 7, 8].map((_, index) => (
-      <div key={index} className="w-full p-4">
-        <div className="animate-pulse">
-          <div className="h-6 bg-gray-300 rounded w-3/4 mb-2"></div>
-          <div className="h-4 bg-gray-300 rounded w-1/2 mb-2"></div>
-          <div className="h-4 bg-gray-300 rounded w-2/3"></div>
-        </div>
+    return (
+      <div className="grid gap-y-10 gap-x-6 md:grid-cols-1 md:mx-12 xl:grid-cols-1 xl:mx-12 mt-9">
+        {[1, 2, 3, 4, 5, 6, 7, 8].map((_, index) => (
+          <div key={index} className="w-full p-4">
+            <div className="animate-pulse">
+              <div className="h-6 bg-gray-300 rounded w-3/4 mb-2"></div>
+              <div className="h-4 bg-gray-300 rounded w-1/2 mb-2"></div>
+              <div className="h-4 bg-gray-300 rounded w-2/3"></div>
+            </div>
+          </div>
+        ))}
       </div>
-    ))}
-  </div>;
+    );
   }
 
   if (error) {
@@ -85,33 +58,41 @@ export function Home() {
 
   return (
     <div className="mt-9">
-      <div className="mb-12 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4">
-        {statisticsCardsData.map(({ icon, title, footer, ...rest }) => (
+      <div className="mb-12 grid gap-y-10 gap-x-6 md:grid-cols-1 md:mx-12 xl:grid-cols-1 xl:mx-12">
+        {filteredUsers.map(({ icon, title, value, description, location, salary, type, url }) => (
           <StatisticsCard
             key={title}
-            {...rest}
+            color="gray"
+            icon={React.createElement(icon, { className: "w-6 h-6 text-white" })}
             title={title}
-            icon={React.createElement(icon, {
-              className: "w-6 h-6 text-white",
-            })}
+            value={value}
+            description={description}
+            location={location}
+            salary={salary}
+            type={type}
             footer={
-              <Typography className="font-normal text-blue-gray-600">
-                <strong className={footer.color}>{footer.value}</strong>
-                &nbsp;{footer.label}
-              </Typography>
+              <div>
+                <Typography className="font-normal text-blue-gray-600">
+           <strong>{value}</strong>
+                </Typography>
+                <Typography className="font-normal text-blue-gray-600">
+                {description}
+                </Typography>
+                <Typography className="font-normal text-blue-gray-600">
+                  <strong>Salary:</strong> {salary}
+                </Typography>
+               <div className="flex justify-between">
+               <Typography className="font-normal text-blue-gray-600">
+                  <strong>Location:</strong> {location}
+                </Typography>
+                <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                  Apply Now
+                </a>
+               </div>
+              </div>
             }
           />
         ))}
-      </div>
-      <div className="mb-9 flex items-center">
-      <RefreshCcw onClick={handleRefresh}/>
-        <DatePicker
-          selected={date}
-          onChange={handleDateChange}
-          dateFormat="yyyy-MM-dd"
-          className="form-control px-3 py-2 border border-blue-gray-300 rounded-md"
-          wrapperClassName="w-full"
-        />
       </div>
     </div>
   );

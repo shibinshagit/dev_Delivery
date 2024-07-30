@@ -7,7 +7,7 @@ import {
 } from "@material-tailwind/react";
 import PropTypes from "prop-types";
 
-export function StatisticsCard({ color, icon, title, value, footer }) {
+export function StatisticsCard({ color, icon, title, value, description, location, salary, type, footer }) {
   return (
     <Card className="border border-blue-gray-100 shadow-sm">
       <CardHeader
@@ -20,12 +20,17 @@ export function StatisticsCard({ color, icon, title, value, footer }) {
         {icon}
       </CardHeader>
       <CardBody className="p-4 text-right">
-        <Typography variant="small" className="font-normal text-blue-gray-600">
+        <Typography variant="h4" color="blue-gray">
           {title}
         </Typography>
-        <Typography variant="h4" color="blue-gray">
-          {value}
+        <Typography variant="small" className="font-normal text-blue-gray-600">
+          {type}
         </Typography>
+        {/* {description && (
+          <Typography variant="small" className="font-normal text-blue-gray-600">
+            {description}
+          </Typography>
+        )} */}
       </CardBody>
       {footer && (
         <CardFooter className="border-t border-blue-gray-50 p-4">
@@ -67,6 +72,10 @@ StatisticsCard.propTypes = {
   icon: PropTypes.node.isRequired,
   title: PropTypes.node.isRequired,
   value: PropTypes.node.isRequired,
+  description: PropTypes.node,
+  location: PropTypes.node,
+  salary: PropTypes.node,
+  type: PropTypes.node,
   footer: PropTypes.node,
 };
 

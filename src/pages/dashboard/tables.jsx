@@ -63,8 +63,8 @@ export function Tables() {
             <thead>
               <tr>
                 {[
-  "Name",
-  "Place",
+  "Job",
+  "Company",
 
     
     <Menu key="menu">
@@ -79,8 +79,8 @@ export function Tables() {
         <MenuItem onClick={() => handleFilterChange('Soon')}>Soon</MenuItem>
       </MenuList>
     </Menu>,
-  "Expire",
-  `T:${filteredUsers.length}`,
+  "Type",
+  `Apllicants:${filteredUsers.length}`,
 ].map((el) => (
                   <th
                     key={el}

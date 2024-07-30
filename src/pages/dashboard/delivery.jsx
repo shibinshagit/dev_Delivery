@@ -20,8 +20,8 @@ export function UpcomingDelivery() {
         </CardHeader>
         <CardBody className="flex flex-col gap-4 p-4 items-center">
           <img
-            src="https://images.vexels.com/content/199964/preview/happy-delivery-boy-character-4da34e.png"
-            alt="Delivery Boy"
+            src="https://cdn-icons-png.flaticon.com/512/9374/9374926.png"
+            alt="Chat"
             className="w-64 h-64 object-cover"
           />
           <Typography variant="h6" color="blue-gray">
