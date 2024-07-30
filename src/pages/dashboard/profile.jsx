@@ -46,13 +46,13 @@ export function Profile() {
               />
               <div>
                 <Typography variant="h5" color="blue-gray" className="mb-1">
-                  Name{id}
+                  Shah{id}
                 </Typography>
                 <Typography
                   variant="small"
                   className="font-normal text-blue-gray-600"
                 >
-                  Place
+                  Kochi, Kerala
                 </Typography>
               </div>
             </div>
@@ -61,11 +61,11 @@ export function Profile() {
                 <TabsHeader>
                   <Tab value="app">
                     <UserIcon className="-mt-1 mr-2 inline-block h-5 w-5" />
-                    Data
+                    Profile
                   </Tab>
                   <Tab value="message">
                     <ListBulletIcon className="-mt-0.5 mr-2 inline-block h-5 w-5" />
-                    Orders
+                    Edit
                   </Tab>
                   {/* <Tab value="settings">
                     <Cog6ToothIcon className="-mt-1 mr-2 inline-block h-5 w-5" />
@@ -78,7 +78,7 @@ export function Profile() {
           <div className="gird-cols-1 mb-12 grid gap-12 px-4 lg:grid-cols-2 xl:grid-cols-1">
             <div>
               <Typography variant="h6" color="blue-gray" className="mb-3">
-                Platform Settings
+                Profile Settings
               </Typography>
               
               <SkeletonContainer>

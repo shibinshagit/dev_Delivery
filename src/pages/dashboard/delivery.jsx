@@ -20,7 +20,7 @@ export function UpcomingDelivery() {
         </CardHeader>
         <CardBody className="flex flex-col gap-4 p-4 items-center">
           <img
-            src="https://cdn-icons-png.flaticon.com/512/9374/9374926.png"
+            src="https://i.pinimg.com/736x/1d/f7/96/1df796d0170ca6f3e273e22d1b69f4d4.jpg"
             alt="Chat"
             className="w-64 h-64 object-cover"
           />

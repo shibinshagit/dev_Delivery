@@ -46,7 +46,7 @@ export const routes = [
         icon: <IdentificationIcon {...icon} />,
         name: "Profile",
         path: "/profile",
-        element: <UpcomingDelivery />,
+        element: <Profile />,
       },{
         icon: <UserCircleIcon {...icon} />,
         name: "update",
