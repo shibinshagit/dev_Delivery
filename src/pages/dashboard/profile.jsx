@@ -10,10 +10,9 @@ import {
   DialogBody,
   DialogFooter,
   Input,
-  IconButton,
-  Tooltip
+  IconButton
 } from "@material-tailwind/react";
-import { PencilIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/solid";
+import { TrashIcon } from "@heroicons/react/24/solid";
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import { X } from 'lucide-react';
@@ -29,13 +28,10 @@ export function Profile() {
     name: '',
     phone: '',
     email: '',
+    bio: '',
     education: [{ degree: '', institution: '', yearOfCompletion: '' }],
     experience: [{ company: '', role: '', startDate: '', endDate: '', description: '' }],
     skills: [''],
-    companyName: '',
-    companyWebsite: '',
-    companySize: '',
-    industry: ''
   });
 
   useEffect(() => {
@@ -44,17 +40,13 @@ export function Profile() {
         name: user.name || '',
         phone: user.phone || '',
         email: user.email || '',
+        bio: user.bio || '',
         education: Array.isArray(user.education) ? [...user.education] : [{ degree: '', institution: '', yearOfCompletion: '' }],
         experience: Array.isArray(user.experience) ? [...user.experience] : [{ company: '', role: '', startDate: '', endDate: '', description: '' }],
         skills: Array.isArray(user.skills) ? [...user.skills] : [''],
-        companyName: user.companyDetails?.companyName || '',
-        companyWebsite: user.companyDetails?.companyWebsite || '',
-        companySize: user.companyDetails?.companySize || '',
-        industry: user.companyDetails?.industry || ''
       });
     }
   }, [user]);
-  
 
   const handleEditToggle = () => {
     setDialogOpen(!dialogOpen);
@@ -63,25 +55,11 @@ export function Profile() {
   const handleInputChange = (e, field, index = null) => {
     if (index !== null) {
       const updatedArray = [...formData[field]];
-      updatedArray[index] = { ...updatedArray[index], [e.target.name]: e.target.value }; // Ensure we are creating a new object
+      updatedArray[index] = { ...updatedArray[index], [e.target.name]: e.target.value };
       setFormData({ ...formData, [field]: updatedArray });
     } else {
       setFormData({ ...formData, [field]: e.target.value });
     }
-  };
-  
-
-  const handleAddEntry = (field) => {
-    setFormData({
-      ...formData,
-      [field]: [...formData[field], field === 'education' ? { degree: '', institution: '', yearOfCompletion: '' } : { company: '', role: '', startDate: '', endDate: '', description: '' }]
-    });
-  };
-
-  const handleRemoveEntry = (field, index) => {
-    const updatedArray = [...formData[field]];
-    updatedArray.splice(index, 1);
-    setFormData({ ...formData, [field]: updatedArray });
   };
 
   const handleSaveChanges = () => {
@@ -91,7 +69,6 @@ export function Profile() {
       }
     })
       .then(response => {
-        console.log('updatedUser:', response.data);
         dispatch(updateUser(response.data));
         handleEditToggle();
       })
@@ -102,70 +79,107 @@ export function Profile() {
 
   return (
     <>
-      <Card className="mx-3 mt-8 mb-6 relative">
-        <CardBody className="flex flex-col items-center p-4">
-          <Avatar
-            src={user.avatar || "../../../public/img/user.jpg"}
-            alt="Profile picture"
-            size="xl"
-            variant="rounded"
-            className="shadow-lg mb-4"
-          />
-          <Typography variant="h5" color="blue-gray" className="mb-2">
-            {user.name || "Your Name"}
-          </Typography>
-          <Typography variant="small" color="gray">
-            {user.email || "Your Email"}
-          </Typography>
-          <Typography variant="small" color="gray">
-            {user.phone ? `Phone: ${user.phone}` : "Phone: Not Provided"}
-          </Typography>
-          
-          {/* Display Skills */}
-          <Typography variant="small" color="gray" className="mt-2">
-            Skills: {formData.skills.length > 0 ? formData.skills.join(', ') : "Add Skills"}
-          </Typography>
+      <Card className="mx-3 mt-8 mb-6 relative shadow-md rounded-lg">
+  <CardBody className="flex flex-col items-center p-6 bg-gray-50 dark:bg-gray-900 transition duration-300">
+    {/* Avatar with hover shadow effect */}
+    <Avatar
+      src={user.avatar || "https://static.vecteezy.com/system/resources/previews/026/530/210/original/modern-person-icon-user-and-anonymous-icon-vector.jpg"}
+      alt="Profile picture"
+      size="xl"
+      variant="circular"
+      className="shadow-lg mb-6 hover:shadow-xl transition-shadow duration-300"
+    />
+    
+    {/* Name with larger font and blue accent */}
+    <Typography variant="h4" color="blue-gray" className="font-bold mb-2">
+      {user.name || "Your Name"}
+    </Typography>
+    
+    
+    {/* Display bio with italic styling */}
+    <Typography variant="small" color="blue-gray" className="italic mt-2 text-center">
+      {formData.bio || "Add a short bio or description"}
+    </Typography>
 
-          {/* Display Education */}
-          <Typography variant="h6" color="gray" className="mt-4">
-            Education:
-          </Typography>
-          {formData.education.map((edu, index) => (
-            <Typography key={index} variant="small" color="gray">
-              {edu.degree} from {edu.institution} ({edu.yearOfCompletion})
-            </Typography>
-          ))}
-          {formData.education.length === 0 && (
-            <Typography variant="small" color="gray">
-             Add Education
-            </Typography>
-          )}
+    {/* Skills badges with hover interaction */}
+    <Typography variant="h6" color="gray" className="mt-4">
+      Skills:
+    </Typography>
+    <div className="flex flex-wrap gap-2 mt-2">
+      {formData.skills.length > 0 ? (
+        formData.skills.map((skill, index) => (
+          <span
+            key={index}
+            className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm cursor-pointer hover:bg-blue-200 transition-colors duration-300"
+          >
+            {skill}
+          </span>
+        ))
+      ) : (
+        <Typography variant="small" color="gray">
+          Add Skills
+        </Typography>
+      )}
+    </div>
 
-          {/* Display Experience */}
-          <Typography variant="h6" color="gray" className="mt-4">
-            Experience:
-          </Typography>
-          {formData.experience.map((exp, index) => (
-            <Typography key={index} variant="small" color="gray">
-              {exp.role} at {exp.company} ({exp.startDate} - {exp.endDate})
-            </Typography>
-          ))}
-          {formData.experience.length === 0 && (
-            <Typography variant="small" color="gray">
-              Add Experience
-            </Typography>
-          )}
+    {/* Education section */}
+    <Typography variant="h6" color="blue-gray" className="mt-6">
+      Contact:
+    </Typography>
+    {/* User email */}
+    <Typography variant="small" color="gray" className="mb-1">
+      {user.email || "Your Email"}
+    </Typography>
+    
+    {/* User phone number */}
+    <Typography variant="small" color="gray" className="mb-1">
+      {user.phone ? `Phone: ${user.phone}` : "Phone: Not Provided"}
+    </Typography>
 
-         
-            <Button
-              className="mt-4"
-              onClick={handleEditToggle}
-            >
-              Edit
-            </Button>
-          
-        </CardBody>
-      </Card>
+    {/* Education section */}
+    <Typography variant="h6" color="blue-gray" className="mt-6">
+      Education:
+    </Typography>
+    {formData.education.length > 0 ? (
+      formData.education.map((edu, index) => (
+        <Typography key={index} variant="small" color="gray" className="mt-1">
+          {edu.degree} from {edu.institution} ({new Date(edu.yearOfCompletion).toLocaleDateString('en-US', { year: 'numeric' })})
+        </Typography>
+      ))
+    ) : (
+      <Typography variant="small" color="gray">
+        Add Education
+      </Typography>
+    )}
+
+    {/* Experience section with formatted dates */}
+    <Typography variant="h6" color="blue-gray" className="mt-6">
+      Experience:
+    </Typography>
+    {formData.experience.length > 0 ? (
+      formData.experience.map((exp, index) => (
+        <Typography key={index} variant="small" color="gray" className="mt-1">
+          {exp.role} at {exp.company} (
+          {new Date(exp.startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} - 
+          {exp.endDate ? new Date(exp.endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : "Present"})
+        </Typography>
+      ))
+    ) : (
+      <Typography variant="small" color="gray">
+        Add Experience
+      </Typography>
+    )}
+
+    {/* Edit profile button with hover effect */}
+    <Button
+      className="mt-6 text-white font-bold py-2 px-4 rounded-full shadow-md hover:shadow-lg transition duration-300"
+      onClick={handleEditToggle}
+    >
+      Edit Profile
+    </Button>
+  </CardBody>
+</Card>
+
 
       <Dialog open={dialogOpen} handler={setDialogOpen}>
         <DialogHeader>
@@ -190,50 +204,17 @@ export function Profile() {
             onChange={(e) => handleInputChange(e, 'email')}
           />
           <Input
+            label="Bio"
+            value={formData.bio}
+            onChange={(e) => handleInputChange(e, 'bio')}
+          />
+          <Input
             label="Skills (comma separated)"
             value={formData.skills.join(', ')}
             onChange={(e) => setFormData({ ...formData, skills: e.target.value.split(', ') })}
           />
 
-          {/* Dynamic Education Fields */}
-          <Typography variant="h6">Education</Typography>
-          {formData.education.map((edu, index) => (
-            <div key={index} className="flex flex-col gap-4 mb-4">
-              <Input
-                label="Degree"
-                name="degree"
-                value={edu.degree}
-                onChange={(e) => handleInputChange(e, 'education', index)}
-              />
-              <Input
-                label="Institution"
-                name="institution"
-                value={edu.institution}
-                onChange={(e) => handleInputChange(e, 'education', index)}
-              />
-              <Input
-                label="Year of Completion"
-                name="yearOfCompletion"
-                value={edu.yearOfCompletion}
-                onChange={(e) => handleInputChange(e, 'education', index)}
-              />
-              <Button
-                className="self-end"
-                onClick={() => handleRemoveEntry('education', index)}
-              >
-                <TrashIcon className="h-5 w-5" />
-              </Button>
-            </div>
-          ))}
-          <Button
-            className="self-start"
-            onClick={() => handleAddEntry('education')}
-          >
-            Add Education
-          </Button>
-
           {/* Dynamic Experience Fields */}
-          <Typography variant="h6">Experience</Typography>
           {formData.experience.map((exp, index) => (
             <div key={index} className="flex flex-col gap-4 mb-4">
               <Input
@@ -249,12 +230,14 @@ export function Profile() {
                 onChange={(e) => handleInputChange(e, 'experience', index)}
               />
               <Input
+                type="date"
                 label="Start Date"
                 name="startDate"
                 value={exp.startDate}
                 onChange={(e) => handleInputChange(e, 'experience', index)}
               />
               <Input
+                type="date"
                 label="End Date"
                 name="endDate"
                 value={exp.endDate}
@@ -274,12 +257,6 @@ export function Profile() {
               </Button>
             </div>
           ))}
-          <Button
-            className="self-start"
-            onClick={() => handleAddEntry('experience')}
-          >
-            Add Experience
-          </Button>
         </DialogBody>
         <DialogFooter>
           <Button onClick={handleSaveChanges}>

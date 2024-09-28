@@ -8,7 +8,7 @@ import {
   ChatBubbleOvalLeftIcon,
   IdentificationIcon,
 } from "@heroicons/react/24/solid";
-import { Home, Profile, Tables, UpcomingDelivery } from "@/pages/dashboard";
+import { Home, Posts, Profile, Tables } from "@/pages/dashboard";
 import { SignUp } from "@/pages/auth";
 import Add from "./pages/dashboard/add";
 import Edit from "./pages/dashboard/edit";
@@ -32,9 +32,9 @@ export const routes = [
       },
       {
         icon: <ChatBubbleOvalLeftIcon {...icon} />,
-        name: "Chat",
+        name: "Posts",
         path: "/chat",
-        element: <UpcomingDelivery />,
+        element: <Posts />,
       },
       {
         icon: <TableCellsIcon {...icon} />,
