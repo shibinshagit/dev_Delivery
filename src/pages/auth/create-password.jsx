@@ -4,7 +4,7 @@ import { Input, Button, Typography } from "@material-tailwind/react";
 import axios from 'axios';
 import { BaseUrl } from '@/constants/BaseUrl';
 import { useDispatch } from 'react-redux';
-import { loginSuccess } from '@/redux/reducers/authSlice';
+import { fetchUserData, loginSuccess } from '@/redux/reducers/authSlice';
 
 export function CreatePassword() {
   const location = useLocation();
@@ -26,9 +26,8 @@ export function CreatePassword() {
      
       if (response.status === 200) {
         const { token } = response.data;
-        // dispatch(fetchCostomers());
         dispatch(loginSuccess({ token }));
-        
+        dispatch(fetchUserData(token ));  
         alert('Login successful');
         navigate('/dashboard/home');
       } else {

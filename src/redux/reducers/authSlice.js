@@ -1,41 +1,31 @@
 import { BaseUrl } from '@/constants/BaseUrl';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { useSelector } from 'react-redux';
 
 
-// Thunk for fetching costomers====================================================================================================================================
-export const fetchCostomers =  createAsyncThunk(
-  'auth/fetchCostomers',
-  async (_, { rejectWithValue }) => {
+// Thunk for fetchUserData====================================================================================================================================
+export const fetchUserData = createAsyncThunk(
+  'auth/fetchUserData',
+  async (token, { rejectWithValue }) => {
     try {
-      console.log('working1'); 
-      const response = await axios.get(`${BaseUrl}/api/users`);
+      const response = await axios.get(`${BaseUrl}/api/userData`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      console.log('userData:',response.data)
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
     }
   }
 );
-  
 
-// Thunk for fetching Orders====================================================================================================================================
-
-  export const fetchOrders = createAsyncThunk(
-    'auth/fetchOrders',
-    async (companyId, { rejectWithValue }) => {
-      try {
-        const response = await axios.get(`${BaseUrl}/company/fetchdata/${companyId}`);
-        return response.data;
-      } catch (error) {
-        return rejectWithValue(error.response.data);
-      }
-    }
-  );
 
 const userInitialState = {
     token: null,
-    customers: [],
-    orders: [],
+    user: null,
     loading: false,
     error: null
 }
@@ -47,46 +37,30 @@ const authSlice = createSlice({
         loginSuccess(state, action) {
             state.token = action.payload.token;
         },
-        updateCostomers(state, action) {
-            state.customers = action.payload.customers;
+        updateUser(state, action) {
+            state.user = action.payload.user;
         },
         logout(state) {
             state.token = null;
-            state.customers = [];
-            state.orders = [];
-        },
-        setOrders(state, action) {
-            state.orders = action.payload.orders;
+            state.user = null;
         }
     },
     extraReducers: (builder) => {
       builder
-        .addCase(fetchCostomers.pending, (state) => {
+        .addCase(fetchUserData.pending, (state) => {
           state.loading = true;
           state.error = null;
         })
-        .addCase(fetchCostomers.fulfilled, (state, action) => {
-          state.customers = action.payload;
+        .addCase(fetchUserData.fulfilled, (state, action) => {
+          state.user = action.payload;
           state.loading = false;
         })
-        .addCase(fetchCostomers.rejected, (state, action) => {
-          state.loading = false;
-          state.error = action.payload;
-        })
-        .addCase(fetchOrders.pending, (state) => {
-          state.loading = true;
-          state.error = null;
-        })
-        .addCase(fetchOrders.fulfilled, (state, action) => {
-          state.orders = action.payload;
-          state.loading = false;
-        })
-        .addCase(fetchOrders.rejected, (state, action) => {
+        .addCase(fetchUserData.rejected, (state, action) => {
           state.loading = false;
           state.error = action.payload;
         });
     }
 })
 
-export const { loginSuccess, logout, setOrders, updateCostomers } = authSlice.actions
+export const { loginSuccess, logout, setOrders, updateUser } = authSlice.actions
 export default authSlice.reducer;

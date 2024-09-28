@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Input, Button, Typography } from "@material-tailwind/react";
 import axios from 'axios';
 import { BaseUrl } from '@/constants/BaseUrl';
-import { useDispatch } from 'react-redux';
-import { loginSuccess } from '@/redux/reducers/authSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchUserData, loginSuccess } from '@/redux/reducers/authSlice';
 
 export function OTPPass() {
   const location = useLocation();
@@ -16,6 +16,13 @@ export function OTPPass() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const token = useSelector((state) => state.auth.token);
+
+  useEffect(() => {
+    if (token) {
+      navigate('/dashboard/home');
+    }
+  }, [token, navigate]);
 
   const handleOTPChange = (index, value) => {
     const newOtp = [...otp];
@@ -39,6 +46,7 @@ export function OTPPass() {
         if (response.status === 200) {
           const { token } = response.data;
           dispatch(loginSuccess({ token }));
+          dispatch(fetchUserData( token ));
           navigate('/dashboard/home');
         } else {
           setError('Password verification failed. Please try again.');

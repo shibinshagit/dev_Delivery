@@ -1,17 +1,17 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { Dashboard, Auth } from "@/layouts";
-import { SignIn, SignUp } from "./pages/auth";
-import PrivateRoute from "./helpers/protect";
+import { SignUp } from "./pages/auth";
 import { Provider } from "react-redux";
 import { store } from "./redux/store";
+import { PrivateRoute, IsAuthenticated } from "./helpers/protect";
 
 function App() {
   return (
     <Provider store={store}>
     <Routes>
-      <Route path="/" element={<SignUp />}/>
+      <Route path="/" element={<IsAuthenticated><SignUp/></IsAuthenticated>}/>
       <Route path="/dashboard/*" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-      <Route path="/auth/*" element={<Auth />} />
+      <Route path="/auth/*" element={<isAuthenticated><Auth/></isAuthenticated>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
     </Provider>

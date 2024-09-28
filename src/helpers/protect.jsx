@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom';
 import {jwtDecode} from 'jwt-decode';
 import { useSelector } from 'react-redux';
 
-const PrivateRoute = ({ children }) => {
+export const PrivateRoute = ({ children }) => {
   const token = useSelector((state) => state.auth.token);
 
   if (!token) {
@@ -23,5 +23,13 @@ const PrivateRoute = ({ children }) => {
   //   return <Navigate to="/" replace />;
   // }
 };
+export const IsAuthenticated = ({ children }) => {
+  const token = useSelector((state) => state.auth.token);
 
-export default PrivateRoute;
+  if (token) {
+    console.log('auth;',token)
+    return <Navigate to="/dashboard/home"/>;
+  }
+  return children;
+};
+

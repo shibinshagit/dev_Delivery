@@ -14,7 +14,6 @@ import {
   ListItem
 } from "@material-tailwind/react";
 import { useDispatch } from 'react-redux';
-import { fetchCostomers } from '@/redux/reducers/authSlice';
 
 function Add() {
   const dispatch = useDispatch();
@@ -36,7 +35,7 @@ function Add() {
     socket.on('dataUpdated', (newData) => {
       console.log('Received data update:', newData);
       // Dispatch an action to update the state
-      dispatch(fetchCostomers()); // Replace with your actual action to refresh data
+       // Replace with your actual action to refresh data
     });
 
     return () => {

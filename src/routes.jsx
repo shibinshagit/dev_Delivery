@@ -9,7 +9,7 @@ import {
   IdentificationIcon,
 } from "@heroicons/react/24/solid";
 import { Home, Profile, Tables, UpcomingDelivery } from "@/pages/dashboard";
-import { SignIn, SignUp } from "@/pages/auth";
+import { SignUp } from "@/pages/auth";
 import Add from "./pages/dashboard/add";
 import Edit from "./pages/dashboard/edit";
 import LeaveForm from "./pages/dashboard/leave";
@@ -64,12 +64,6 @@ export const routes = [
     title: "auth pages",
     layout: "auth",
     pages: [
-      {
-        icon: <ServerStackIcon {...icon} />,
-        name: "sign in",
-        path: "/sign-in",
-        element: <SignIn />,
-      },
       {
         icon: <RectangleStackIcon {...icon} />,
         name: "sign up",
