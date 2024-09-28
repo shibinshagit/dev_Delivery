@@ -79,7 +79,7 @@ export function Profile() {
 
   return (
     <>
-      <Card className="mx-3 mt-8 mb-6 relative shadow-md rounded-lg">
+      <Card className=" mt-3 mb-20 relative shadow-md rounded-lg">
   <CardBody className="flex flex-col items-center p-6 bg-gray-50 dark:bg-gray-900 transition duration-300">
     {/* Avatar with hover shadow effect */}
     <Avatar
