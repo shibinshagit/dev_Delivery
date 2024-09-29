@@ -11,33 +11,39 @@ import { MapPin } from "lucide-react";
 export function Home() {
   const [points, setPoints] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const user = useSelector(state => state.auth.user);
   const navigate = useNavigate();
+  const [controller] = useMaterialTailwindController();
+  const { searchTerm } = controller;
 
   const handleViewOrder = (id) => {
     navigate(`/dashboard/viewOrder/${id}`);
   };
 
-  const [error, setError] = useState("");
-  const [controller] = useMaterialTailwindController();
-  const { searchTerm } = controller;
-
   const filteredPoints = points.filter(point =>
-    point.point.place.toLowerCase().includes(searchTerm.toLowerCase()) 
-    || point.point.mode.toLowerCase().includes(searchTerm.toLowerCase())
+    point.point.place.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    point.point.mode.toLowerCase().includes(searchTerm.toLowerCase())
   );
-  const fetchData = async () => {
+
+  useEffect(() => {
+    if (!user || !user._id) {
+      setLoading(false); // Stop loading if user ID is not available
+      return;
+    }
+
+    const fetchData = async () => {
       try {
         const response = await axios.get(`${BaseUrl}/services/deliverypoints/${user._id}`);
         console.log("response:", response.data);
-        setPoints(response.data);  // Set fetched points here
-        setLoading(false);
+        setPoints(response.data);
       } catch (error) {
         setError("Failed to load points.");
+      } finally {
         setLoading(false);
       }
     };
-  useEffect(() => {
+
     fetchData();
   }, [user]);
 
@@ -66,36 +72,35 @@ export function Home() {
       <div className="mb-20 grid gap-y-10 gap-x-6 md:grid-cols-1 md:mx-12 xl:grid-cols-1 xl:mx-12">
         {filteredPoints.map((point) => (
           <StatisticsCard
-          key={point.point._id}
-          color="gray"
-          icon={<MapPin className="w-6 h-6 text-white" />}
-          title={point.point.place}
-          value={point.point.mode}
-          // description={description}
-          location={point.point.place}
-          // salary={salary}
-          type={point.point.mode}
-          footer={
-            <div>
-              <Typography className="font-normal text-green-600">
-         <strong>{'Delivered'}</strong>
-              </Typography>
-             
-              <Typography className="font-normal text-blue-gray-600">
-                <strong>Orders:</strong> {point.userCount}
-              </Typography>
-             <div className="flex justify-between">
-             <Typography className="font-normal text-blue-gray-600">
-                <strong>Location:</strong>  <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(point.point.place)}`}
-                 target="_blank" rel="noopener noreferrer" className="text-black-500 hover:underline">View</a>
-              </Typography>
-        
-                {point.point.mode === 'single' ? <a  onClick={() => handleViewOrder(point.point._id)} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Show Orders</a>
-                : ''}
-              
-             </div>
-            </div>
-          }
+            key={point.point._id}
+            color="gray"
+            icon={<MapPin className="w-6 h-6 text-white" />}
+            title={point.point.place}
+            value={point.point.mode}
+            location={point.point.place}
+            type={point.point.mode}
+            footer={
+              <div>
+                <Typography className="font-normal text-green-600">
+                  <strong>{'Delivered'}</strong>
+                </Typography>
+                <Typography className="font-normal text-blue-gray-600">
+                  <strong>Orders:</strong> {point.userCount}
+                </Typography>
+                <div className="flex justify-between">
+                  <Typography className="font-normal text-blue-gray-600">
+                    <strong>Location:</strong>
+                    <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(point.point.place)}`}
+                       target="_blank" rel="noopener noreferrer" className="text-black-500 hover:underline">View</a>
+                  </Typography>
+                  {point.point.mode === 'single' && (
+                    <a onClick={() => handleViewOrder(point.point._id)} className="text-blue-500 hover:underline">
+                      Show Orders
+                    </a>
+                  )}
+                </div>
+              </div>
+            }
           />
         ))}
       </div>
