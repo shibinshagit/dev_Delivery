@@ -47,6 +47,7 @@ export function Configurator() {
   const { openConfigurator, sidenavColor, sidenavType, fixedNavbar } = controller;
   const [stars, setStars] = React.useState(0);
   const dispatch = useDispatch()
+  const user = useSelector(state => state.auth.user)
   const handleLogout = () => {
 dispatch(logout())
   }
@@ -77,10 +78,11 @@ dispatch(logout())
       <div className="flex items-start justify-between px-6 pt-8 pb-6">
         <div>
           <Typography variant="h5" color="blue-gray">
-            Eduzell Configurator
+          Welcome {user.name}
+            
           </Typography>
           <Typography className="font-normal text-blue-gray-600">
-            Eduzell Portal.
+          Bismi Mess Delivery Partner
           </Typography>
         </div>
         <IconButton
@@ -118,7 +120,7 @@ dispatch(logout())
            
           </Typography>
           <div className="mt-3 flex items-center gap-2">
-            <Button
+            {/* <Button
               variant={sidenavType === "dark" ? "gradient" : "outlined"}
               onClick={() => setSidenavType(dispatcher, "dark")}
             >
@@ -135,20 +137,20 @@ dispatch(logout())
               onClick={() => setSidenavType(dispatcher, "white")}
             >
               portal
-            </Button>
+            </Button> */}
           </div>
         </div>
         <div className="mb-12">
           <hr />
           <div className="flex items-center justify-between py-5">
-            <Typography variant="h6" color="blue-gray">
+            {/* <Typography variant="h6" color="blue-gray">
               Company
             </Typography>
             <Switch
               id="navbar-fixed"
               value={fixedNavbar}
               onChange={() => setFixedNavbar(dispatcher, !fixedNavbar)}
-            />
+            /> */}
           </div>
           <hr />
         </div>

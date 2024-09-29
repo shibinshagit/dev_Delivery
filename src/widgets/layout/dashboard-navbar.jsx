@@ -57,7 +57,7 @@ export function DashboardNavbar() {
       <div className="flex flex-col-reverse justify-between gap-6 md:flex-row md:items-center">
         <div className="capitalize">
           <Typography variant="h6" color="blue-gray">
-            {page === 'tables' ? 'costomer data' : page === 'chat' ? '' : page === 'edit' ? '' : page === 'home' ? 'Find jobs' : page}
+            {page === 'tables' ? 'costomer data' : page === 'chat' ? '' : page === 'edit' ? '' : page === 'home' ? 'Delivery Points' : page}
           </Typography>
         </div>
         <div className="flex items-center">

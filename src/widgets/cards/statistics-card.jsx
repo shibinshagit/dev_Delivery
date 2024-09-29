@@ -17,7 +17,9 @@ export function StatisticsCard({ color, icon, title, value, description, locatio
         shadow={false}
         className="absolute grid h-12 w-12 place-items-center"
       >
+       
         {icon}
+        
       </CardHeader>
       <CardBody className="p-4 text-right">
         <Typography variant="h4" color="blue-gray">

@@ -2,148 +2,171 @@ import React, { useState, useEffect } from "react";
 import {
   Typography,
   Card,
-  CardHeader,
-  CardBody,
   Button,
   Dialog,
   DialogHeader,
   DialogBody,
   DialogFooter,
-  Input,
 } from "@material-tailwind/react";
-import { useSelector } from "react-redux";
 import axios from "axios";
 import InfiniteScroll from "react-infinite-scroll-component";
+import { useParams } from "react-router-dom"; 
+import { BaseUrl } from "@/constants/BaseUrl";
+import { StatisticsCard } from "@/widgets/cards";
+import { Phone } from "lucide-react";
 
-// Free API for tech news
-const TECH_NEWS_API = "https://newsapi.org/v2/top-headlines?category=technology&apiKey=8a348376e5c945e6845af8ff8cf519b5";
-
-export function Posts() {
-  const user = useSelector((state) => state.user); // Get user id from Redux
+export function ViewOrder() {
+  const { id } = useParams();
   const [open, setOpen] = useState(false);
-  const [postType, setPostType] = useState(""); // post or jobPost
-  const [postContent, setPostContent] = useState("");
-  const [posts, setPosts] = useState([]);
-  const [techNews, setTechNews] = useState([]);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [orders, setOrders] = useState([]);
   const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
 
-  // Function to handle dialog opening
-  const openDialog = () => setOpen(true);
-  const closeDialog = () => setOpen(false);
+  const openDialog = (order) => {
+    setSelectedOrder(order);
+    setOpen(true);
+  };
 
-  // Handle form submission for Post/Job Post
-  const handlePostSubmit = async () => {
-    const data = {
-      userId: user.id,
-      content: postContent,
-      type: postType, // 'post' or 'jobPost'
-    };
+  const closeDialog = () => {
+    setOpen(false);
+    setSelectedOrder(null);
+  };
 
+  const fetchOrders = async () => {
     try {
-      const response = await axios.post("/api/posts", data); // Replace with your actual post API
-      setPosts([response.data, ...posts]); // Add new post to the state
-      setPostContent("");
-      closeDialog();
+      const response = await axios.get(`${BaseUrl}/services/orders/${id}?page=${page}`);
+      if (response.status === 200) {
+        const users = response.data.users;
+        setOrders(users);
+        if (users.length === 0) {
+          setHasMore(false);
+        } else {
+          setPage(page + 1);
+        }
+      } else {
+        setHasMore(false);
+      }
     } catch (error) {
-      console.error("Error posting data:", error);
+      console.error("Error fetching orders:", error);
     }
   };
 
-  // Fetch tech news using a free API with infinite scrolling
-  const fetchTechNews = async () => {
-    try {
-      const response = await axios.get(`${TECH_NEWS_API}&page=${page}`);
-      setTechNews([...techNews, ...response.data.articles]);
-      setPage(page + 1); // Increment page for next batch of news
-    } catch (error) {
-      console.error("Error fetching tech news:", error);
-    }
-  };
-
-  // Initial fetch for tech news
   useEffect(() => {
-    fetchTechNews();
+    fetchOrders();
   }, []);
 
-  return (
-    <div className="mx-auto mb-20 flex max-w-screen-lg flex-col gap-8">
-      {/* Add Post Button */}
-      <Button color="dark" onClick={openDialog}>Add Post</Button>
-
-      {/* Dialog for selecting post type */}
-      <Dialog open={open} handler={closeDialog}>
-        <DialogHeader>Select Post Type</DialogHeader>
-        <DialogBody>
-          <div className="flex gap-4">
-            <Button
-              color={postType === "post" ? "blue" : "gray"}
-              onClick={() => setPostType("post")}
-            >
-              Regular Post
-            </Button>
-            <Button
-              color={postType === "jobPost" ? "blue" : "gray"}
-              onClick={() => setPostType("jobPost")}
-            >
-              Job Post
-            </Button>
-          </div>
-      
-          <Input className="mt-8" variant="standard" label="" value={postContent} placeholder="" onChange={(e) => setPostContent(e.target.value)}/>
-        </DialogBody>
-        <DialogFooter className="mt-8">
-          <Button color="red" className="mx-3" onClick={closeDialog}>
-            Cancel
-          </Button>
-          <Button color="green" onClick={handlePostSubmit}>
-            Submit
-          </Button>
-        </DialogFooter>
-      </Dialog>
-
-      {/* Displaying Tech News with Infinite Scroll */}
-      <div className="tech-news-section">
-  <Typography variant="h4" className="mb-6">
-    Tech News Today
-  </Typography>
-
-  <InfiniteScroll
-    dataLength={techNews.length} // Length of the news array
-    next={fetchTechNews} // Function to fetch more news
-    hasMore={true} // Infinite scrolling continues
-    loader={
-      <div className="text-center py-4">
-        <Typography variant="h6">Loading more news...</Typography>
-      </div>
+  const handleStatusUpdate = async (status) => {
+    try {
+      await axios.put(`${BaseUrl}/services/orders/${selectedOrder._id}/status`, { status });
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order._id === selectedOrder._id ? { ...order, status } : order
+        )
+      );
+      closeDialog();
+    } catch (error) {
+      console.error("Error updating order status:", error);
     }
-  >
-    <div className="news-grid">
-      {techNews.map((news, index) => (
-        <Card key={index} className="news-card mt-8 mb-6 shadow-md">
-          <CardHeader className="bg-blue-100 mt-1 p-4">
-            <Typography variant="h6" className="font-bold">
-              {news.title}
-            </Typography>
-          </CardHeader>
-          <CardBody className="p-4">
-            <Typography className="mb-4 text-gray-700">{news.description}</Typography>
-            <a
-              href={news.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline"
-            >
-              Read more
-            </a>
-          </CardBody>
-        </Card>
-      ))}
-    </div>
-  </InfiniteScroll>
-</div>
+  };
 
+  return (
+    <div className="mx-auto mb-20 max-w-screen-lg">
+      <InfiniteScroll
+        dataLength={orders.length}
+        next={fetchOrders}
+        hasMore={hasMore}
+        loader={
+          <div className="text-center py-4">
+            <Typography variant="h6">Loading more orders...</Typography>
+          </div>
+        }
+      >
+        <div className="orders-grid">
+          {orders.map((order, index) => (
+            <Card key={index} className="order-card mb-6 shadow-md">
+              <StatisticsCard
+                color="gray"
+                icon={
+                  <a href={`tel:+91${order.phone}`}>
+                    <Phone className="w-6 h-6 text-white" />
+                  </a>
+                }
+                title={order.name}
+                location={order.status}
+                type={order.phone}
+                footer={
+                  <div>
+                    <div className="flex justify-between">
+                      <Typography className="font-normal text-blue-gray-600">
+                        {order.location && typeof order.location === 'object' ? (
+                          <a
+                            href={`https://www.google.com/maps/dir/?api=1&destination=${order.location.latitude},${order.location.longitude}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center space-x-2"
+                          >
+                            <img src='https://cdn-icons-png.flaticon.com/512/2875/2875433.png' alt="Google Maps" className="w-4 h-4" />
+                            <Typography>View</Typography>
+                          </a>
+                        ) : ''}
+                      </Typography>
+                      
+                      <Button onClick={() => openDialog(order)}>
+                        {order.status}
+                      </Button>
+                    </div>
+
+                  
+                  </div>
+                }
+              />
+            </Card>
+          ))}
+        </div>
+      </InfiniteScroll>
+
+      {/* Dialog for updating order status */}
+      {selectedOrder && (
+        <Dialog open={open} handler={closeDialog}>
+          <DialogHeader>Update Order Status</DialogHeader> 
+          <div className="flex space-x-2 mt-4 justify-center mb-6">
+                      <img
+                        src="https://i.pinimg.com/236x/63/29/3b/63293b3128f9d0778c27977f374a32cf.jpg"
+                        alt="Order image 1"
+                        className="w-16 h-16 object-cover rounded"
+                      />
+                      <img
+                        src="https://i.pinimg.com/236x/63/29/3b/63293b3128f9d0778c27977f374a32cf.jpg"
+                        alt="Order image 2"
+                        className="w-16 h-16 object-cover rounded"
+                      />
+                      <img
+                        src="https://i.pinimg.com/236x/63/29/3b/63293b3128f9d0778c27977f374a32cf.jpg"
+                        alt="Order image 3"
+                        className="w-16 h-16 object-cover rounded"
+                      />
+                    </div>
+          <DialogBody>
+            <div className="flex gap-4 justify-center items-center">
+              
+              <Button color="green" onClick={() => handleStatusUpdate("Delivered")}>
+                Delivered
+              </Button>
+              <Button color="red" onClick={() => handleStatusUpdate("Canceled")}>
+                Canceled
+              </Button>
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <Button onClick={closeDialog}>
+              Close
+            </Button>
+          </DialogFooter>
+        </Dialog>
+      )}
     </div>
   );
 }
 
-export default Posts;
+export default ViewOrder;

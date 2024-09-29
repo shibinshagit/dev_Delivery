@@ -9,12 +9,12 @@ export const fetchUserData = createAsyncThunk(
   'auth/fetchUserData',
   async (token, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${BaseUrl}/api/userData`, {
+      console.log(token,'token')
+      const response = await axios.get(`${BaseUrl}/services/DBData`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
-      console.log('userData:',response.data)
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -35,7 +35,7 @@ const authSlice = createSlice({
     initialState: userInitialState,
     reducers: {
         loginSuccess(state, action) {
-            state.token = action.payload.token;
+            state.token = action.payload;
         },
         updateUser(state, action) {
             state.user = action.payload.user;

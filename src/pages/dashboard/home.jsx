@@ -1,40 +1,47 @@
 import React, { useState, useEffect } from "react";
-import {
-  Typography,
-} from "@material-tailwind/react";
+import { Typography } from "@material-tailwind/react";
 import { StatisticsCard } from "@/widgets/cards";
-import { statisticsCardsData } from "@/data";
 import { useMaterialTailwindController } from "@/context";
-// import { fetchStatistics } from "@/data";
+import { useSelector } from "react-redux";
+import axios from "axios";
+import { BaseUrl } from "@/constants/BaseUrl";
+import { useNavigate } from "react-router-dom";
+import { MapPin } from "lucide-react";
 
 export function Home() {
-  // const [statisticsCardsData, setStatisticsCardsData] = useState([]);
+  const [points, setPoints] = useState([]);
   const [loading, setLoading] = useState(true);
+  const user = useSelector(state => state.auth.user);
+  const navigate = useNavigate();
+
+  const handleViewOrder = (id) => {
+    navigate(`/dashboard/viewOrder/${id}`);
+  };
+
   const [error, setError] = useState("");
   const [controller] = useMaterialTailwindController();
-  const {searchTerm}= controller
+  const { searchTerm } = controller;
 
-  const filteredUsers = statisticsCardsData.filter(user =>
-    user.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.value.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredPoints = points.filter(point =>
+    point.point.place.toLowerCase().includes(searchTerm.toLowerCase()) 
+    || point.point.mode.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-
-
   useEffect(() => {
-    // const fetchData = async () => {
-    //   try {
-    //     const data = await fetchStatistics();
-        // setStatisticsCardsData(statisticsCardsData);
-    //     setLoading(false);
-    //   } catch (error) {
-    //     setError("Failed to load job data.");
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(`${BaseUrl}/services/deliverypoints/${user._id}`);
+        console.log("response:", response.data);
+        setPoints(response.data);  // Set fetched points here
         setLoading(false);
-    //   }
-    // };
+      } catch (error) {
+        setError("Failed to load points.");
+        setLoading(false);
+      }
+    };
 
-    // fetchData();
-  }, [statisticsCardsData]);
+    fetchData();
+  }, [user]);
 
   if (loading) {
     return (
@@ -58,39 +65,39 @@ export function Home() {
 
   return (
     <div className="mt-9">
-      <div className="mb-12 grid gap-y-10 gap-x-6 md:grid-cols-1 md:mx-12 xl:grid-cols-1 xl:mx-12">
-        {filteredUsers.map(({ icon, title, value, description, location, salary, type, url }) => (
+      <div className="mb-20 grid gap-y-10 gap-x-6 md:grid-cols-1 md:mx-12 xl:grid-cols-1 xl:mx-12">
+        {filteredPoints.map((point) => (
           <StatisticsCard
-            key={title}
-            color="gray"
-            icon={React.createElement(icon, { className: "w-6 h-6 text-white" })}
-            title={title}
-            value={value}
-            description={description}
-            location={location}
-            salary={salary}
-            type={type}
-            footer={
-              <div>
-                <Typography className="font-normal text-blue-gray-600">
-           <strong>{value}</strong>
-                </Typography>
-                <Typography className="font-normal text-blue-gray-600">
-                {description}
-                </Typography>
-                <Typography className="font-normal text-blue-gray-600">
-                  <strong>Salary:</strong> {salary}
-                </Typography>
-               <div className="flex justify-between">
-               <Typography className="font-normal text-blue-gray-600">
-                  <strong>Location:</strong> {location}
-                </Typography>
-                <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
-                  Apply Now
-                </a>
-               </div>
-              </div>
-            }
+          key={point.point._id}
+          color="gray"
+          icon={<MapPin className="w-6 h-6 text-white" />}
+          title={point.point.place}
+          value={point.point.mode}
+          // description={description}
+          location={point.point.place}
+          // salary={salary}
+          type={point.point.mode}
+          footer={
+            <div>
+              <Typography className="font-normal text-green-600">
+         <strong>{'Delivered'}</strong>
+              </Typography>
+             
+              <Typography className="font-normal text-blue-gray-600">
+                <strong>Orders:</strong> {point.userCount}
+              </Typography>
+             <div className="flex justify-between">
+             <Typography className="font-normal text-blue-gray-600">
+                <strong>Location:</strong>  <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(point.point.place)}`}
+                 target="_blank" rel="noopener noreferrer" className="text-black-500 hover:underline">View</a>
+              </Typography>
+        
+                {point.point.mode === 'single' ? <a  onClick={() => handleViewOrder(point.point._id)} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Show Orders</a>
+                : ''}
+              
+             </div>
+            </div>
+          }
           />
         ))}
       </div>

@@ -8,7 +8,7 @@ import {
   ChatBubbleOvalLeftIcon,
   IdentificationIcon,
 } from "@heroicons/react/24/solid";
-import { Home, Posts, Profile, Tables } from "@/pages/dashboard";
+import { Home, Profile, Tables, ViewOrder } from "@/pages/dashboard";
 import { SignUp } from "@/pages/auth";
 import Add from "./pages/dashboard/add";
 import Edit from "./pages/dashboard/edit";
@@ -26,15 +26,21 @@ export const routes = [
     pages: [
       {
         icon: <RectangleStackIcon {...icon} />,
-        name: "Jobs",
+        name: "Orders",
         path: "/home",
         element: <Home />,
       },
       {
+        icon: <IdentificationIcon {...icon} />,
+        name: "Profile",
+        path: "/profile",
+        element: <Profile />,
+      },
+      {
         icon: <ChatBubbleOvalLeftIcon {...icon} />,
-        name: "Posts",
-        path: "/chat",
-        element: <Posts />,
+        name: "orders",
+        path: "/viewOrder/:id",
+        element: <ViewOrder />,
       },
       {
         icon: <TableCellsIcon {...icon} />,
@@ -43,11 +49,6 @@ export const routes = [
         element: <Tables />,
       },
       {
-        icon: <IdentificationIcon {...icon} />,
-        name: "Profile",
-        path: "/profile",
-        element: <Profile />,
-      },{
         icon: <UserCircleIcon {...icon} />,
         name: "update",
         path: "/edit",
