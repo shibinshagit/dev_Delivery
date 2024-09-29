@@ -26,22 +26,20 @@ export function Home() {
     point.point.place.toLowerCase().includes(searchTerm.toLowerCase()) 
     || point.point.mode.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
+  const fetchData = async () => {
+    try {
+      const response = await axios.get(`${BaseUrl}/services/deliverypoints/${user._id}`);
+      console.log("response:", response.data);
+      setPoints(response.data);  // Set fetched points here
+      setLoading(false);
+    } catch (error) {
+      setError("Failed to load points.");
+      setLoading(false);
+    }
+  };
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(`${BaseUrl}/services/deliverypoints/${user._id}`);
-        console.log("response:", response.data);
-        setPoints(response.data);  // Set fetched points here
-        setLoading(false);
-      } catch (error) {
-        setError("Failed to load points.");
-        setLoading(false);
-      }
-    };
-
     fetchData();
-  }, [user]);
+  }, []);
 
   if (loading) {
     return (

@@ -78,11 +78,11 @@ dispatch(logout())
       <div className="flex items-start justify-between px-6 pt-8 pb-6">
         <div>
           <Typography variant="h5" color="blue-gray">
-          Welcome {user.name}
-            
+          {/* Welcome {user.name} */}
+          Bismi Mess Delivery Partner
           </Typography>
           <Typography className="font-normal text-blue-gray-600">
-          Bismi Mess Delivery Partner
+          {/* Bismi Mess Delivery Partner */}
           </Typography>
         </div>
         <IconButton

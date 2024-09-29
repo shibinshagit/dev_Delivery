@@ -9,10 +9,16 @@ import {
 } from "@/widgets/layout";
 import routes from "@/routes";
 import { useMaterialTailwindController, setOpenConfigurator } from "@/context";
+import { useEffect } from "react";
 
 export function Dashboard() {
   const [controller, dispatch] = useMaterialTailwindController();
   const { sidenavType } = controller;
+  useEffect(() => {
+    // Your condition or effect here
+    setOpenConfigurator(dispatch, false);
+  }, [dispatch]); // Add dependencies as needed
+  
 
   return (
     <div className="min-h-screen bg-blue-gray-50/50">
