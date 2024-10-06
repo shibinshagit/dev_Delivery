@@ -44,20 +44,21 @@ export function DashboardNavbar() {
 
 
   return (
-    <Navbar
-      color={fixedNavbar ? "white" : "transparent"}
-      className={`rounded-xl transition-all ${
-        fixedNavbar
-          ? "sticky top-0 z-40 py-3 shadow-md shadow-blue-gray-500/5"
-          : "px-0 py-1"
-      }`}
-      fullWidth
-      blurred={fixedNavbar}
-   style={{display:'none'}} >
+  <Navbar
+  color={fixedNavbar ? "white" : "transparent"}
+  className={`rounded-xl transition-all ${
+    fixedNavbar
+      ? "sticky top-0 z-40 py-3 shadow-md shadow-blue-gray-500/5"
+      : "px-0 py-1"
+  } ${page === 'viewOrder' ? 'hidden' : ''}`}
+  fullWidth
+  blurred={fixedNavbar}
+>
+ 
       <div className="flex flex-col-reverse justify-between gap-6 md:flex-row md:items-center">
         <div className="capitalize">
           <Typography variant="h6" color="blue-gray">
-            {page === 'tables' ? 'costomer data' : page === 'chat' ? '' : page === 'edit' ? '' : page === 'home' ? 'Delivery Points' : page}
+            {page === 'tables' ? 'costomer data' : page === 'viewOrder' ? '' : page === 'edit' ? '' : page === 'home' ? 'Delivery Points' : page}
           </Typography>
         </div>
         <div className="flex items-center">
