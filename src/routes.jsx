@@ -34,7 +34,7 @@ export const routes = [
         icon: <IdentificationIcon {...icon} />,
         name: "Profile",
         path: "/profile",
-        element: <Profile />,
+        element: <Tables />,
       },
       {
         icon: <ChatBubbleOvalLeftIcon {...icon} />,
@@ -46,7 +46,7 @@ export const routes = [
         icon: <TableCellsIcon {...icon} />,
         name: "Progress",
         path: "/progress",
-        element: <Tables />,
+        element: <Profile />,    //take this profile to profile route after development
       },
       {
         icon: <UserCircleIcon {...icon} />,

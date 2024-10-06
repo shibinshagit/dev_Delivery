@@ -1,187 +1,220 @@
-import React, { useState, useEffect } from 'react';
-import { useMaterialTailwindController } from '@/context/index'; // Adjust the path accordingly
-import { useNavigate } from 'react-router-dom';
-import { Card, CardHeader, CardBody, Typography, Avatar, Chip, Input, Menu, MenuHandler, MenuList, MenuItem, Button } from "@material-tailwind/react";
-import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
-import { useSelector } from 'react-redux';
+import React, { useState } from 'react';
+import { PhoneIcon, ArrowLeftOnRectangleIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { IconButton, Button } from "@material-tailwind/react";
+import { Car } from 'lucide-react';
 
 export function Tables() {
-  const navigate = useNavigate();
-  const [controller] = useMaterialTailwindController();
-  const { searchTerm } = controller;
-  const customers = useSelector((state) => state.auth.customers);
-  const [users, setUsers] = useState(customers);
-  const [error, setError] = useState('');
-  const [filter, setFilter] = useState('All');
+  const riders = [
+    { name: 'Ramees', estimatedTime: '3 mins' },
+    { name: 'Murshid', estimatedTime: '10 mins' },
+    { name: 'Favas', address: 'Address, House, Street etc' },
+    { name: 'Ali', estimatedTime: '5 mins' },
+    { name: 'Sara', estimatedTime: '8 mins' },
+    { name: 'Tariq', estimatedTime: '4 mins' },
+    { name: 'Nadia', estimatedTime: '6 mins' },
+    { name: 'Omar', estimatedTime: '7 mins' },
+    { name: 'Zain', estimatedTime: '9 mins' },
+    { name: 'Lara', estimatedTime: '2 mins' },
+  ];
 
-  const handleUpdate = (user) => {
-    navigate(`/dashboard/edit`, { state: { user } });
+  const [expanded, setExpanded] = useState(true);
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  // Sample image URLs
+  const images = [
+   
+  ];
+
+  const handleImageClick = (image) => {
+    setSelectedImage(image);
   };
 
-  const handleFilterChange = (selectedFilter) => {
-    setFilter(selectedFilter);
+  const handleCloseImage = () => {
+    setSelectedImage(null);
   };
-
-  const filteredUsers = users.filter(user => {
-    if (filter === 'All') {
-      return true;
-    } else {
-      return user.latestOrder && user.latestOrder.status.toLowerCase() === filter.toLowerCase();
-    }
-  }).filter(user =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.phone.includes(searchTerm) ||
-    user.place.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  if (error) {
-    return <p>{error}</p>;
-  }
 
   return (
-    <div className="mt-3 mb-8 flex flex-col gap-12">
-      
-       {/* <CardHeader variant="gradient" color="gray" className="mb-8 p-6 flex justify-between items-center">
-  <Typography variant="h6" color="white" className="hidden md:block">
-    Customer Data
-  </Typography>
-  <div className="flex gap-4">
-    <Input
-      type="text"
-      placeholder="Search ..."
-      value={searchTerm}
-      onChange={handleSearch}
-      className="bg-white"
-    />
-   
+    <div className="flex flex-col h-screen overflow-hidden">
+     <div className="relative h-2/4 w-full">
+  {/* Map and Route Display */}
+  <div className="relative h-full w-full">
+    {/* Darker map background */}
+    <div className="absolute inset-0 bg-gray-800"></div> 
   </div>
-</CardHeader> */}
+
+  {/* Top Section */}
+  <div className="absolute top-0 inset-x-0 flex items-center justify-between p-4 z-20 bg-transparent">
+    <IconButton variant="text">
+      <ArrowLeftOnRectangleIcon className="h-6 w-6 text-gray-200" />
+    </IconButton>
+    <span className="text-lg font-semibold text-gray-200">Order Tracking</span>
+    <IconButton variant="text">
+      <MagnifyingGlassIcon className="h-6 w-6 text-gray-200" />
+    </IconButton>
+  </div>
+</div>
 
 
-        <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
-          <table className="w-full min-w-[640px] table-auto">
-            <thead>
-              <tr>
-                {[
-  "Job",
-  "Company",
+      {/* Driver Details and Call Action */}
+      <div className="px-4 py-2 text-white">
+  <div className="bg-orange-700 flex items-center justify-between shadow-md p-3 rounded-xl shining-border">
+    <div className="flex items-center">
+      <img src="https://img.pikbest.com/png-images/20240516/scooter-delivery-man-takeway-food-_10566930.png!sw800" alt="Driver" className="h-12 w-12 rounded-full mr-3" />
+      <div>
+        <p className="font-semibold">Shibin Sha</p>
+        <p className="text-sm">2.3 KM</p>
+      </div>
+    </div>
+    <PhoneIcon className="h-6 w-6" />
+  </div>
 
-    
-    <Menu key="menu">
-      <MenuHandler>
-        <span>Status</span>
-      </MenuHandler>
-      <MenuList>
-        <MenuItem onClick={() => handleFilterChange('All')}>All</MenuItem>
-        <MenuItem onClick={() => handleFilterChange('Active')}>Active</MenuItem>
-        <MenuItem onClick={() => handleFilterChange('Leave')}>Leave</MenuItem>
-        <MenuItem onClick={() => handleFilterChange('Renew')}>Renew</MenuItem>
-        <MenuItem onClick={() => handleFilterChange('Soon')}>Soon</MenuItem>
-      </MenuList>
-    </Menu>,
-  "Type",
-  `Apllicants:${filteredUsers.length}`,
-].map((el) => (
-                  <th
-                    key={el}
-                    className="border-b border-blue-gray-50 py-3 px-5 text-left"
-                  >
-                    <Typography
-                      variant="small"
-                      className="text-[11px] font-bold uppercase text-blue-gray-400"
-                    >
-                      {el}
-                    </Typography>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filteredUsers.map((user, key) => {
-                const className = `py-3 px-5 ${
-                  key === users.length - 1 ? "" : "border-b border-blue-gray-50"
-                }`;
-                // const { orders } = user;
-                // const lastOrder = orders[orders.length - 1] || {};
-                const { latestOrder = {} } = user;
-                const { status, orderEnd } = latestOrder;
-            
-                const formattedDate = orderEnd ? new Intl.DateTimeFormat('en-GB').format(new Date(orderEnd)) : '';
+  <style jsx>{`
+    .shining-border {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .shining-border::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        45deg, 
+        rgba(255, 255, 255, 0) 0%, 
+        rgba(255, 255, 255, 0.5) 50%, 
+        rgba(255, 255, 255, 0) 100%
+      );
+      transform: translateX(-100%);
+      animation: shine 2s infinite;
+    }
+
+    @keyframes shine {
+      0% {
+        transform: translateX(-100%);
+      }
+      100% {
+        transform: translateX(100%);
+      }
+    }
+  `}</style>
+
+</div>
 
 
-                return (
-                  <tr key={user._id} className="even:bg-blue-gray-50/50">
-                    <td className={className}>
-                      <div className="flex items-center gap-4">
-                        <Avatar
-                          src="https://static.vecteezy.com/system/resources/previews/026/530/210/original/modern-person-icon-user-and-anonymous-icon-vector.jpg"
-                          alt={user.name}
-                          size="sm"
-                          variant="rounded"
-                        />
-                        <div>
-                          <Typography
-                            variant="small"
-                            color="blue-gray"
-                            className="font-semibold"
-                          >
-                            {user.name}
-                          </Typography>
-                          <Typography className="text-xs font-normal text-blue-gray-500">
-                            {user.phone}
-                          </Typography>
-                        </div>
-                      </div>
-                    </td>
-                    <td className={className}>
-                      <Typography className="text-xs font-semibold text-blue-gray-600">
-                        {user.place}
-                      </Typography>
-                      <Typography className="text-xs font-normal text-blue-gray-500">
-                        {user.plans}
-                      </Typography>
-                    </td>
-                    <td className={className}>
-                      <Chip
-                        variant="gradient"
-                        color={
-                          status === 'renew'
-                            ? 'blue-gray'
-                            : status === 'leave'
-                            ? 'yellow'
-                            : new Date(orderEnd).getTime() - new Date().getTime() <= 3 * 24 * 60 * 60 * 1000
-                            ? 'red'
-                            : status === 'active'
-                            ? 'green'
-                            : status === 'soon'
-                            ? 'blue'
-                            : 'orange'
-                        }
-                        value={status || 'Unpaid'}
-                        className="py-0.5 px-2 text-[11px] font-medium w-fit"
-                      />
-                    </td>
-                    <td className={className}>
-                      <Typography className="text-xs font-semibold text-blue-gray-600">
-                        {formattedDate || 'N/A'}
-                      </Typography>
-                    </td>
-                    <td className={className}>
-                      <Typography
-                        as="a"
-                        className="text-xs font-semibold text-blue-gray-600"
-                        onClick={() => handleUpdate(user)}
-                      >
-                        Edit
-                      </Typography>
-                    </td>
-                  </tr>
+      {/* Delivery Stops */}
+      <div className="px-4 pt-2 pb-16">
+      <div className="shadow-md p-3 rounded-lg h-60 overflow-y-scroll">
+        <div className="text-sm">
+          {riders.map((rider, index) => (
+            <div key={index}>
+              {/* Rider Item */}
+              <div className="flex items-center py-2">
+                <div className="flex-shrink-0">
+                  <div className="bg-orange-500 rounded-full p-2">
+                   <Car color='white'/>
+
+                  </div>
+                </div>
+                <div className="ml-4">
+                  <p className="font-medium">{rider.name}</p>
+                  <p className="text-xs text-gray-500">
+                    Estimated time: {rider.estimatedTime || rider.address}
+                  </p>
+                </div>
+              </div>
+
+              {/* Dashed line if not the last item */}
+              {index < riders.length - 1 && (
+                <div className="ml-3 border-l-2 border-dashed border-orange-500 h-6 my-1"></div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+
+      {/* Navigation Guidance */}
+      <div className="relative">
+      <div
+        className={`fixed bottom-0 w-full transition-transform duration-300 ease-in-out `}
+      >
+        <div
+          className="bg-orange-800 shadow-md p-3 h-16 rounded-t-md flex justify-between items-center cursor-pointer font-bold text-white"
+         
+        >
+          <p className="text-sm">Next</p>
+          <p className="text-sm"  onClick={() => setExpanded(!expanded)}>Delivered</p>
+        </div>
+      </div>
+
+      {expanded && (
+        <div className="absolute left-0 right-0 bottom-16 bg-white p-4 flex flex-col items-center">      
+          {images.length > 0 ? (
+            <div className="image-container flex justify-center space-x-4">
+              {images.map((image, index) => (
+                <img
+                  key={index}
+                  src={image}
+                  alt={`Delivery ${index}`}
+                  className="w-24 h-24 cursor-pointer"
+                  onClick={() => handleImageClick(image)}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="image-container flex justify-center gap-3"><style jsx>{`
+              .skeleton-loader {
+                position: relative;
+                overflow: hidden;
+              }
+      
+              .skeleton-loader::before {
+                content: '';
+                position: absolute;
+                top: -100%;
+                left: -100%;
+                width: 300%;
+                height: 300%;
+                background: linear-gradient(
+                  90deg,
+                  rgba(255, 255, 255, 0.5) 0%,
+                  rgba(255, 255, 255, 0) 50%,
+                  rgba(255, 255, 255, 0.5) 100%
                 );
-              })}
-            </tbody>
-          </table>
-        </CardBody>
-  
+                animation: shine 1.5s infinite;
+              }
+      
+              @keyframes shine {
+                0% {
+                  transform: translateX(-100%);
+                }
+                100% {
+                  transform: translateX(100%);
+                }
+              }
+            `}</style>
+              <div className="skeleton-loader w-24 h-24 bg-gray-300 animate-pulse rounded-md" />
+            <div className="skeleton-loader w-24 h-24 bg-gray-300 animate-pulse rounded-md" />
+            <div className="skeleton-loader w-24 h-24 bg-gray-300 animate-pulse rounded-md" />
+          </div>
+          )}
+
+          {selectedImage && (
+            <div className="zoomed-image-overlay fixed inset-0 flex justify-center items-center bg-black bg-opacity-70 z-30">
+              <div className="relative">
+                <img src={selectedImage} alt="Zoomed" className="max-w-full max-h-full" />
+                <button className="absolute top-0 right-0 p-2 text-white" onClick={handleCloseImage}>
+                  Close
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
     </div>
   );
 }

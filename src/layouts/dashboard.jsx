@@ -28,7 +28,7 @@ export function Dashboard() {
           sidenavType === "dark" ? "/img/logo-ct.png" : "/img/logo-ct-dark.png"
         }
       />
-      <div className="p-4 xl:ml-80">
+      <div className="xl:ml-80">
         <DashboardNavbar />
         <Configurator />
         <Routes>
