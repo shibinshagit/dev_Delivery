@@ -16,18 +16,20 @@ export function ViewOrder() {
   const [selectedImage, setSelectedImage] = useState(null);
   const mapRef = useRef(null);
   const [currentLocation, setCurrentLocation] = useState(null);
-  const mapInstance = useRef(null); // Reference for the map instance
 
+  // Open the order details dialog
   const openDialog = (order) => {
     setSelectedOrder(order);
     setOpen(true);
   };
 
+  // Close the order details dialog
   const closeDialog = () => {
     setOpen(false);
     setSelectedOrder(null);
   };
 
+  // Fetch orders from API
   const fetchOrders = async () => {
     try {
       const response = await axios.get(`${BaseUrl}/services/orders/${id}?page=${page}`);
@@ -47,35 +49,54 @@ export function ViewOrder() {
     }
   };
 
+  // Fetch orders on component mount
   useEffect(() => {
     fetchOrders();
   }, []);
 
-  // Set up geolocation watcher
+  // Get delivery boy's current location
   useEffect(() => {
     if (navigator.geolocation) {
-      const watchId = navigator.geolocation.watchPosition(
+      navigator.geolocation.getCurrentPosition(
         (position) => {
-          const newLocation = {
+          setCurrentLocation({
             lat: position.coords.latitude,
             lng: position.coords.longitude,
-          };
-          setCurrentLocation(newLocation);
-
-          // Update map center without making a new API call
-          if (mapInstance.current) {
-            mapInstance.current.setCenter(newLocation);
-          }
+          });
         },
         (error) => {
           console.error("Error getting current location:", error);
         }
       );
-
-      // Cleanup function to stop watching location
-      return () => navigator.geolocation.clearWatch(watchId);
     }
   }, []);
+
+  // Handle the "Next Order" action
+  const handleNextOrder = () => {
+    if (currentOrderIndex < orders.length - 1) {
+      setCurrentOrderIndex(currentOrderIndex + 1);
+    }
+  };
+
+  // Handle user click from the user list
+  const handleUserClick = (index) => {
+    setCurrentOrderIndex(index);
+  };
+
+  // Handle phone call action
+  const handleCall = (phoneNumber) => {
+    window.location.href = `tel:+91${phoneNumber}`;
+  };
+
+  // Handle image click to expand
+  const handleImageClick = (image) => {
+    setSelectedImage(image);
+  };
+
+  // Close the expanded image
+  const handleCloseImage = () => {
+    setSelectedImage(null);
+  };
 
   // Display route directions to the current order location
   useEffect(() => {
@@ -85,155 +106,47 @@ export function ViewOrder() {
         lng: orders[currentOrderIndex].location.longitude,
       };
 
-      // Initialize the map only on first render
-      if (!mapInstance.current) {
-        const map = new window.google.maps.Map(mapRef.current, {
-          center: currentLocation,
-          zoom: 14,
-        });
-        mapInstance.current = map; // Store the map instance for future updates
+      const map = new window.google.maps.Map(mapRef.current, {
+        center: currentLocation,
+        zoom: 14,
+      });
 
-        const directionsService = new window.google.maps.DirectionsService();
-        const directionsRenderer = new window.google.maps.DirectionsRenderer();
-        directionsRenderer.setMap(map);
+      const directionsService = new window.google.maps.DirectionsService();
+      const directionsRenderer = new window.google.maps.DirectionsRenderer();
+      directionsRenderer.setMap(map);
 
-        directionsService.route(
-          {
-            origin: currentLocation,
-            destination,
-            travelMode: window.google.maps.TravelMode.DRIVING,
-          },
-          (result, status) => {
-            if (status === window.google.maps.DirectionsStatus.OK) {
-              directionsRenderer.setDirections(result);
-            } else {
-              console.error("Error fetching directions:", result);
-            }
+      directionsService.route(
+        {
+          origin: currentLocation,
+          destination,
+          travelMode: window.google.maps.TravelMode.DRIVING,
+        },
+        (result, status) => {
+          if (status === window.google.maps.DirectionsStatus.OK) {
+            directionsRenderer.setDirections(result);
+          } else {
+            console.error("Error fetching directions:", result);
           }
-        );
-      } else {
-        // Update route when location or order changes
-        const directionsService = new window.google.maps.DirectionsService();
-        const directionsRenderer = new window.google.maps.DirectionsRenderer();
-        directionsRenderer.setMap(mapInstance.current);
-
-        directionsService.route(
-          {
-            origin: currentLocation,
-            destination,
-            travelMode: window.google.maps.TravelMode.DRIVING,
-          },
-          (result, status) => {
-            if (status === window.google.maps.DirectionsStatus.OK) {
-              directionsRenderer.setDirections(result);
-            } else {
-              console.error("Error fetching directions:", result);
-            }
-          }
-        );
-      }
+        }
+      );
     }
   }, [currentLocation, currentOrderIndex, orders]);
 
-  const handleNextOrder = () => {
-    if (currentOrderIndex < orders.length - 1) {
-      setCurrentOrderIndex(currentOrderIndex + 1);
-    }
-  };
-
-  const handleUserClick = (index) => {
-    setCurrentOrderIndex(index);
-  };
-
-  const handleCall = (phoneNumber) => {
-    window.location.href = `tel:+91${phoneNumber}`;
-  };
-
-  const handleImageClick = (image) => {
-    setSelectedImage(image);
-  };
-
-  const handleCloseImage = () => {
-    setSelectedImage(null);
-  };
-
   return (
     <div className="flex flex-col h-screen overflow-hidden">
-      <MapDisplay mapRef={mapRef} />
-      <NextOrderAndCallAction currentOrder={orders[currentOrderIndex]} handleCall={handleCall} />
-      <UserList orders={orders} currentOrderIndex={currentOrderIndex} handleUserClick={handleUserClick} />
-      <NavigationGuidance
-        expanded={expanded}
-        setExpanded={setExpanded}
-        currentOrder={orders[currentOrderIndex]}
-        handleNextOrder={handleNextOrder}
-        handleImageClick={handleImageClick}
-        selectedImage={selectedImage}
-        handleCloseImage={handleCloseImage}
-      />
-       <style jsx>{`
-    .skeleton-loader {
-      position: relative;
-      overflow: hidden;
-    }
-
-    .skeleton-loader::before {
-      content: '';
-      position: absolute;
-      top: -100%;
-      left: -100%;
-      width: 300%;
-      height: 300%;
-      background: linear-gradient(
-        90deg,
-        rgba(255, 255, 255, 0.5) 0%,
-        rgba(255, 255, 255, 0) 50%,
-        rgba(255, 255, 255, 0.5) 100%
-      );
-      animation: shine 1.5s infinite;
-    }
-
-    @keyframes shine {
-      0% {
-        transform: translateX(-100%);
-      }
-      100% {
-        transform: translateX(100%);
-      }
-    }
-    .shining-border {
-      position: relative;
-      overflow: hidden;
-    }
-
-    .shining-border::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(
-        45deg, 
-        rgba(255, 255, 255, 0) 0%, 
-        rgba(255, 255, 255, 0.5) 50%, 
-        rgba(255, 255, 255, 0) 100%
-      );
-      transform: translateX(-100%);
-      animation: shine 2s infinite;
-    }
-
-    @keyframes shine {
-      0% {
-        transform: translateX(-100%);
-      }
-      100% {
-        transform: translateX(100%);
-      }
-    }
-  `}</style>
-
-    </div>
+    <MapDisplay mapRef={mapRef} />
+    <NextOrderAndCallAction currentOrder={orders[currentOrderIndex]} handleCall={handleCall} />
+    <UserList orders={orders} currentOrderIndex={currentOrderIndex} handleUserClick={handleUserClick} />
+    <NavigationGuidance
+      expanded={expanded}
+      setExpanded={setExpanded}
+      currentOrder={orders[currentOrderIndex]}
+      handleNextOrder={handleNextOrder}
+      handleImageClick={handleImageClick}
+      selectedImage={selectedImage}
+      handleCloseImage={handleCloseImage}
+    />
+  </div>
   );
 }
 
