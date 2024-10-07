@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Typography } from "@material-tailwind/react";
-import { StatisticsCard } from "@/widgets/cards";
-import { useMaterialTailwindController } from "@/context";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import { BaseUrl } from "@/constants/BaseUrl";
@@ -14,28 +12,20 @@ export function Home() {
   const [error, setError] = useState("");
   const user = useSelector(state => state.auth.user);
   const navigate = useNavigate();
-  const [controller] = useMaterialTailwindController();
-  const { searchTerm } = controller;
 
   const handleViewOrder = (id) => {
     navigate(`/dashboard/viewOrder/${id}`);
   };
 
-  const filteredPoints = points.filter(point =>
-    point.point.place.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    point.point.mode.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   useEffect(() => {
     if (!user || !user._id) {
-      setLoading(false); // Stop loading if user ID is not available
+      setLoading(false);
       return;
     }
 
     const fetchData = async () => {
       try {
         const response = await axios.get(`${BaseUrl}/services/deliverypoints/${user._id}`);
-        console.log("response:", response.data);
         setPoints(response.data);
       } catch (error) {
         setError("Failed to load points.");
@@ -68,42 +58,75 @@ export function Home() {
   }
 
   return (
-    <div className="mt-9">
-      <div className="mb-20 grid gap-y-10 gap-x-6 md:grid-cols-1 md:mx-12 xl:grid-cols-1 xl:mx-12">
-        {filteredPoints.map((point) => (
-          <StatisticsCard
-            key={point.point._id}
-            color="gray"
-            icon={<MapPin className="w-6 h-6 text-white" />}
-            title={point.point.place}
-            value={point.point.mode}
-            location={point.point.place}
-            type={point.point.mode}
-            footer={
-              <div>
-                <Typography className="font-normal text-green-600">
-                  <strong>{'Delivered'}</strong>
-                </Typography>
-                <Typography className="font-normal text-blue-gray-600">
-                  <strong>Orders:</strong> {point.userCount}
-                </Typography>
-                <div className="flex justify-between">
-                  <Typography className="font-normal text-blue-gray-600">
-                    <strong>Location:</strong>
-                    <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(point.point.place)}`}
-                       target="_blank" rel="noopener noreferrer" className="text-black-500 hover:underline">View</a>
-                  </Typography>
-                  {point.point.mode === 'single' && (
-                    <a onClick={() => handleViewOrder(point.point._id)} className="text-blue-500 hover:underline">
-                      Show Orders
-                    </a>
-                  )}
-                </div>
-              </div>
-            }
-          />
+    <div className=" px-4 ">
+      <div className="bg-white rounded-lg shadow-lg  space-y-4">
+        {points.map((point,index) => (
+          <div key={point.point._id} className={`flex items-start p-4 text-white rounded-lg ${index===0?'shining-border bg-gray-900': 'bg-black'}`}>
+            <MapPin className="w-6 h-6 text-orange-600 mr-3 mt-1" />
+            <div className="flex-grow">
+              <Typography className="font-semibold text-lg">{point.point.place}</Typography>
+              <Typography className="text-sm ">{point.point.mode}</Typography>
+              {/* <Typography className="font-normal text-blue-gray-600 mt-2">
+                <strong>Location:</strong>
+                <a
+                  href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(point.point.place)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-500 hover:underline ml-1"
+                >
+                  View
+                </a>
+              </Typography> */}
+            </div>
+            <div className="ml-4 text-right">
+              <Typography className="font-normal text-green-600">
+                <strong>Delivered</strong>
+              </Typography>
+              <Typography className="font-normal text-blue-gray-600">
+                <strong>Orders:</strong> {point.userCount}
+              </Typography>
+              {point.point.mode === 'single' && (
+                <a onClick={() => handleViewOrder(point.point._id)} className="ext-blue-gray-600 hover:underline mt-2 block">
+                  Show Orders
+                </a>
+              )}
+            </div>
+          </div>
         ))}
       </div>
+
+      <style jsx>{`
+        .shining-border {
+          position: relative;
+          overflow: hidden;
+        }
+
+        .shining-border::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 200%;
+          height: 200%;
+          background: linear-gradient(
+            45deg, 
+            rgba(255, 255, 255, 0) 0%, 
+            rgba(255, 255, 255, 0.5) 50%, 
+            rgba(255, 255, 255, 0) 100%
+          );
+          transform: translateX(-100%);
+          animation: shine 2s infinite;
+        }
+
+        @keyframes shine {
+          0% {
+            transform: translateX(-100%);
+          }
+          100% {
+            transform: translateX(100%);
+          }
+        }
+      `}</style>
     </div>
   );
 }

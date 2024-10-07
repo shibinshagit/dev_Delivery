@@ -21,7 +21,7 @@ export function Dashboard() {
   
 
   return (
-    <div className="min-h-screen bg-blue-gray-50/50">
+    <div className="bg-gray-100 min-h-screen ">
       <Sidenav
         routes={routes}
         brandImg={

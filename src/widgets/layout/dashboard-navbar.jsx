@@ -55,10 +55,10 @@ export function DashboardNavbar() {
   blurred={fixedNavbar}
 >
  
-      <div className="flex flex-col-reverse justify-between gap-6 md:flex-row md:items-center">
+      <div className="flex flex-col-reverse p-4 justify-between gap-6 md:flex-row md:items-center">
         <div className="capitalize">
           <Typography variant="h6" color="blue-gray">
-            {page === 'tables' ? 'costomer data' : page === 'viewOrder' ? '' : page === 'edit' ? '' : page === 'home' ? 'Delivery Points' : page}
+            {page === 'tables' ? 'costomer data' : page === 'viewOrder' ? '' : page === 'edit' ? '' : page === 'home' ? '' : page}
           </Typography>
         </div>
         <div className="flex items-center">

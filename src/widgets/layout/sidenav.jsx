@@ -98,7 +98,7 @@ export function Sidenav({ brandImg, brandName, routes }) {
 
       {/* Bottom navigation for mobile view */}
       <nav
-        className={`${sidenavTypes[sidenavType]} fixed bottom-0 inset-x-0 z-50 h-16 w-full flex justify-around items-center border-t border-blue-gray-100 xl:hidden`} style={{display:'none'}}
+        className={`${sidenavTypes[sidenavType]} fixed bottom-0 inset-x-0 z-50 h-16 w-full flex justify-around items-center border-t border-blue-gray-100 xl:hidden hidden`}
       >
         {routes.slice(0,1).map(({ layout, pages }, key) =>
           pages.slice(0,2).map(({ icon, name, path }) => (
