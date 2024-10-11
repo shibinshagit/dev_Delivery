@@ -15,6 +15,8 @@ export function ViewOrder() {
   const [expanded, setExpanded] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const mapRef = useRef(null);
+  const directionsRendererRef = useRef(null); // To store the directions renderer
+  const directionsServiceRef = useRef(null); // To store the directions service
   const [currentLocation, setCurrentLocation] = useState(null);
 
   // Open the order details dialog
@@ -55,74 +57,59 @@ export function ViewOrder() {
   }, []);
 
   // Get delivery boy's current location
- // Get delivery boy's current location and watch for changes
-useEffect(() => {
-  if (navigator.geolocation) {
-    const watchId = navigator.geolocation.watchPosition(
-      (position) => {
-        const newLocation = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        };
-        setCurrentLocation(newLocation);
-        console.log('currentLocation:', newLocation); // Log updated location
-      },
-      (error) => {
-        console.error("Error getting current location:", error);
-      },
-      { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
-    );
-
-    return () => navigator.geolocation.clearWatch(watchId); // Cleanup the watcher on component unmount
-  }
-}, []);
-
-
-  // Handle the "Next Order" action
-  const handleNextOrder = () => {
-    if (currentOrderIndex < orders.length - 1) {
-      setCurrentOrderIndex(currentOrderIndex + 1);
-    }
-  };
-
-  // Handle user click from the user list
-  const handleUserClick = (index) => {
-    setCurrentOrderIndex(index);
-  };
-
-  // Handle phone call action
-  const handleCall = (phoneNumber) => {
-    window.location.href = `tel:+91${phoneNumber}`;
-  };
-
-  // Handle image click to expand
-  const handleImageClick = (image) => {
-    setSelectedImage(image);
-  };
-
-  // Close the expanded image
-  const handleCloseImage = () => {
-    setSelectedImage(null);
-  };
-
-  // Display route directions to the current order location
   useEffect(() => {
-    if (currentLocation && orders[currentOrderIndex]?.location) {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setCurrentLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.error("Error getting current location:", error);
+        }
+      );
+    }
+  }, []);
+
+  // Initialize the map and directions service only once
+  useEffect(() => {
+    if (currentLocation && !mapRef.current) {
+      const mapOptions = {
+        center: currentLocation,
+        zoom: 14,
+        mapTypeControl: false,
+        zoomControl: false,
+        streetViewControl: false,
+        scaleControl: false,
+      };
+  
+      // Create the map instance
+      mapRef.current = new window.google.maps.Map(document.getElementById('map'), mapOptions);
+  
+      // Create the directions service and renderer instances
+      directionsServiceRef.current = new window.google.maps.DirectionsService();
+      directionsRendererRef.current = new window.google.maps.DirectionsRenderer({
+        map: mapRef.current,
+        suppressMarkers: false,
+      });
+    }
+  }, [currentLocation]);
+
+  // Update the map when the current location or order changes
+  useEffect(() => {
+    if (currentLocation && orders[currentOrderIndex]?.location && mapRef.current) {
       const destination = {
         lat: orders[currentOrderIndex].location.latitude,
         lng: orders[currentOrderIndex].location.longitude,
       };
 
-      const map = new window.google.maps.Map(mapRef.current, {
-        center: currentLocation,
-        zoom: 14,
-      });
+      // Update map center to current location
+      mapRef.current.setCenter(currentLocation);
 
-      const directionsService = new window.google.maps.DirectionsService();
-      const directionsRenderer = new window.google.maps.DirectionsRenderer();
-      directionsRenderer.setMap(map);
-
-      directionsService.route(
+      // Fetch and display the route
+      directionsServiceRef.current.route(
         {
           origin: currentLocation,
           destination,
@@ -130,7 +117,7 @@ useEffect(() => {
         },
         (result, status) => {
           if (status === window.google.maps.DirectionsStatus.OK) {
-            directionsRenderer.setDirections(result);
+            directionsRendererRef.current.setDirections(result);
           } else {
             console.error("Error fetching directions:", result);
           }
@@ -139,25 +126,50 @@ useEffect(() => {
     }
   }, [currentLocation, currentOrderIndex, orders]);
 
+    // Handle the "Next Order" action
+    const handleNextOrder = () => {
+      if (currentOrderIndex < orders.length - 1) {
+        setCurrentOrderIndex(currentOrderIndex + 1);
+      }
+    };
+  
+    // Handle user click from the user list
+    const handleUserClick = (index) => {
+      setCurrentOrderIndex(index);
+    };
+  
+    // Handle phone call action
+    const handleCall = (phoneNumber) => {
+      window.location.href = `tel:+91${phoneNumber}`;
+    };
+  
+    // Handle image click to expand
+    const handleImageClick = (image) => {
+      setSelectedImage(image);
+    };
+  
+    // Close the expanded image
+    const handleCloseImage = () => {
+      setSelectedImage(null);
+    };
   return (
     <div className="flex flex-col h-screen overflow-hidden">
-<h1>Latitude: {currentLocation?.lat}</h1>
-<h1>Longitude: {currentLocation?.lng}</h1>
-    <MapDisplay mapRef={mapRef} />
-    <NextOrderAndCallAction currentOrder={orders[currentOrderIndex]} handleCall={handleCall} />
-    <UserList orders={orders} currentOrderIndex={currentOrderIndex} handleUserClick={handleUserClick} />
-    <NavigationGuidance
-      expanded={expanded}
-      setExpanded={setExpanded}
-      currentOrder={orders[currentOrderIndex]}
-      handleNextOrder={handleNextOrder}
-      handleImageClick={handleImageClick}
-      selectedImage={selectedImage}
-      handleCloseImage={handleCloseImage}
-    />
-
-  </div>
+      <div id="map" style={{ height: '400px' }} /> {/* Map container */}
+      <NextOrderAndCallAction currentOrder={orders[currentOrderIndex]} handleCall={handleCall} />
+      <UserList orders={orders} currentOrderIndex={currentOrderIndex} handleUserClick={handleUserClick} />
+      <NavigationGuidance
+        expanded={expanded}
+        setExpanded={setExpanded}
+        currentOrder={orders[currentOrderIndex]}
+        handleNextOrder={handleNextOrder}
+        handleImageClick={handleImageClick}
+        selectedImage={selectedImage}
+        handleCloseImage={handleCloseImage}
+      />
+    </div>
   );
 }
 
 export default ViewOrder;
+
+

@@ -55,21 +55,55 @@ export function ViewOrder() {
   }, []);
 
   // Get delivery boy's current location
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setCurrentLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-        },
-        (error) => {
-          console.error("Error getting current location:", error);
-        }
-      );
+ // Get delivery boy's current location and watch for changes
+useEffect(() => {
+  if (navigator.geolocation) {
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        const newLocation = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
+        setCurrentLocation(newLocation);
+        console.log('currentLocation:', newLocation); // Log updated location
+      },
+      (error) => {
+        console.error("Error getting current location:", error);
+      },
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
+    );
+
+    return () => navigator.geolocation.clearWatch(watchId); // Cleanup the watcher on component unmount
+  }
+}, []);
+
+
+  // Handle the "Next Order" action
+  const handleNextOrder = () => {
+    if (currentOrderIndex < orders.length - 1) {
+      setCurrentOrderIndex(currentOrderIndex + 1);
     }
-  }, []);
+  };
+
+  // Handle user click from the user list
+  const handleUserClick = (index) => {
+    setCurrentOrderIndex(index);
+  };
+
+  // Handle phone call action
+  const handleCall = (phoneNumber) => {
+    window.location.href = `tel:+91${phoneNumber}`;
+  };
+
+  // Handle image click to expand
+  const handleImageClick = (image) => {
+    setSelectedImage(image);
+  };
+
+  // Close the expanded image
+  const handleCloseImage = () => {
+    setSelectedImage(null);
+  };
 
   // Display route directions to the current order location
   useEffect(() => {
@@ -107,6 +141,8 @@ export function ViewOrder() {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">
+<h1>Latitude: {currentLocation?.lat}</h1>
+<h1>Longitude: {currentLocation?.lng}</h1>
     <MapDisplay mapRef={mapRef} />
     <NextOrderAndCallAction currentOrder={orders[currentOrderIndex]} handleCall={handleCall} />
     <UserList orders={orders} currentOrderIndex={currentOrderIndex} handleUserClick={handleUserClick} />
@@ -119,67 +155,6 @@ export function ViewOrder() {
       selectedImage={selectedImage}
       handleCloseImage={handleCloseImage}
     />
-     <style jsx>{`
-    .skeleton-loader {
-      position: relative;
-      overflow: hidden;
-    }
-
-    .skeleton-loader::before {
-      content: '';
-      position: absolute;
-      top: -100%;
-      left: -100%;
-      width: 300%;
-      height: 300%;
-      background: linear-gradient(
-        90deg,
-        rgba(255, 255, 255, 0.5) 0%,
-        rgba(255, 255, 255, 0) 50%,
-        rgba(255, 255, 255, 0.5) 100%
-      );
-      animation: shine 1.5s infinite;
-    }
-
-    @keyframes shine {
-      0% {
-        transform: translateX(-100%);
-      }
-      100% {
-        transform: translateX(100%);
-      }
-    }
-    .shining-border {
-      position: relative;
-      overflow: hidden;
-    }
-
-    .shining-border::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(
-        45deg, 
-        rgba(255, 255, 255, 0) 0%, 
-        rgba(255, 255, 255, 0.5) 50%, 
-        rgba(255, 255, 255, 0) 100%
-      );
-      transform: translateX(-100%);
-      animation: shine 2s infinite;
-    }
-
-    @keyframes shine {
-      0% {
-        transform: translateX(-100%);
-      }
-      100% {
-        transform: translateX(100%);
-      }
-    }
-  `}</style>
 
   </div>
   );
