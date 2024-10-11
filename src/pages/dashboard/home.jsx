@@ -59,7 +59,7 @@ export function Home() {
 
   return (
     <div className=" px-4 ">
-      <div className="bg-white rounded-lg shadow-lg  space-y-4">
+      <div className="rounded-lg shadow-lg  space-y-4">
         {points.map((point,index) => (
           <div key={point.point._id} className={`flex items-start p-4 text-white rounded-lg ${index===0?'shining-border bg-gray-900': 'bg-black'}`}>
             <MapPin className="w-6 h-6 text-orange-600 mr-3 mt-1" />
