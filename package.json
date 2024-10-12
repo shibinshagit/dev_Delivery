@@ -10,8 +10,10 @@
   },
   "dependencies": {
     "@heroicons/react": "2.0.18",
+    "@mapbox/polyline": "^1.2.1",
     "@material-tailwind/react": "2.1.4",
     "@reduxjs/toolkit": "^2.2.6",
+    "@turf/turf": "^7.1.0",
     "apexcharts": "3.44.0",
     "axios": "^1.7.2",
     "jwt-decode": "^4.0.0",

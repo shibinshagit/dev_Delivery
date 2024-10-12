@@ -1,50 +1,36 @@
+// ViewOrder.jsx
+
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import polyline from '@mapbox/polyline';
+import * as turf from '@turf/turf';
 import { BaseUrl } from '@/constants/BaseUrl';
+
 
 export function ViewOrder() {
   const { id } = useParams();
-  const [open, setOpen] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState(null);
   const [orders, setOrders] = useState([]);
   const [currentOrderIndex, setCurrentOrderIndex] = useState(0);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
   const [expanded, setExpanded] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const mapRef = useRef(null);
-  const directionsRendererRef = useRef(null); // To store the directions renderer
-  const directionsServiceRef = useRef(null); // To store the directions service
   const [currentLocation, setCurrentLocation] = useState(null);
-  const watchIdRef = useRef(null); // To store the watchPosition ID
-
-  // Open the order details dialog
-  const openDialog = (order) => {
-    setSelectedOrder(order);
-    setOpen(true);
-  };
-
-  // Close the order details dialog
-  const closeDialog = () => {
-    setOpen(false);
-    setSelectedOrder(null);
-  };
+  const deliveryBoyMarkerRef = useRef(null);
+  const routePolylineRef = useRef(null);
+  const [routesData, setRoutesData] = useState([]); // Store route data
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const originMarkerRef = useRef(null);
+  const destinationMarkerRef = useRef(null);
 
   // Fetch orders from API
   const fetchOrders = async () => {
     try {
-      const response = await axios.get(`${BaseUrl}/services/orders/${id}?page=${page}`);
+      const response = await axios.get(`${BaseUrl}/services/orders/${id}`);
       if (response.status === 200) {
-        const users = response.data.users;
-        if (users.length === 0) {
-          setHasMore(false);
-        } else {
-          setOrders((prevOrders) => [...prevOrders, ...users]);
-          setPage(page + 1);
-        }
+        setOrders(response.data.users);
       } else {
-        setHasMore(false);
+        console.error("Error fetching orders");
       }
     } catch (error) {
       console.error("Error fetching orders:", error);
@@ -59,7 +45,7 @@ export function ViewOrder() {
   // Get delivery boy's current location and watch for changes
   useEffect(() => {
     if (navigator.geolocation) {
-      watchIdRef.current = navigator.geolocation.watchPosition(
+      const watchId = navigator.geolocation.watchPosition(
         (position) => {
           setCurrentLocation({
             lat: position.coords.latitude,
@@ -74,19 +60,19 @@ export function ViewOrder() {
 
       // Cleanup on component unmount
       return () => {
-        navigator.geolocation.clearWatch(watchIdRef.current);
+        navigator.geolocation.clearWatch(watchId);
       };
     }
   }, []);
 
-  // Initialize the map and directions service only once
+  // Initialize the map once
   useEffect(() => {
-    if (currentLocation && !mapRef.current) {
+    if (currentLocation && !mapLoaded) {
       const mapOptions = {
         center: currentLocation,
         zoom: 14,
         mapTypeControl: false,
-        zoomControl: false,
+        zoomControl: true,
         streetViewControl: false,
         scaleControl: false,
       };
@@ -94,80 +80,222 @@ export function ViewOrder() {
       // Create the map instance
       mapRef.current = new window.google.maps.Map(document.getElementById('map'), mapOptions);
 
-      // Create the directions service and renderer instances
-      directionsServiceRef.current = new window.google.maps.DirectionsService();
-      directionsRendererRef.current = new window.google.maps.DirectionsRenderer({
+      // Place a marker for the delivery boy
+      deliveryBoyMarkerRef.current = new window.google.maps.Marker({
+        position: currentLocation,
         map: mapRef.current,
-        suppressMarkers: false,
+        icon: {
+          url: 'https://maps.google.com/mapfiles/ms/icons/blue.png', // Use a car icon URL or your own icon
+          scaledSize: new window.google.maps.Size(32, 32), // Adjust size as needed
+        },
+      });
+
+      setMapLoaded(true);
+    }
+  }, [currentLocation, mapLoaded]);
+
+  // Fetch initial route data for each order
+  useEffect(() => {
+    const fetchRoutes = async () => {
+      if (currentLocation && orders.length > 0 && routesData.length === 0) {
+        console.log('Fetching initial routes');
+        const service = new window.google.maps.DirectionsService();
+        const routePromises = orders.map((order) => {
+          return new Promise((resolve) => {
+            service.route(
+              {
+                origin: currentLocation,
+                destination: {
+                  lat: order.location.latitude,
+                  lng: order.location.longitude,
+                },
+                travelMode: window.google.maps.TravelMode.DRIVING,
+              },
+              (result, status) => {
+                if (status === window.google.maps.DirectionsStatus.OK) {
+                  resolve({
+                    orderId: order._id,
+                    route: result.routes[0],
+                    lastUpdated: Date.now(),
+                  });
+                } else {
+                  console.error('Directions API Error for order ID', order._id, ':', status);
+                  resolve(null);
+                }
+              }
+            );
+          });
+        });
+
+        try {
+          const routes = await Promise.all(routePromises);
+          const validRoutes = routes.filter((route) => route !== null);
+          setRoutesData(validRoutes);
+        } catch (error) {
+          console.error('Error fetching routes:', error);
+        }
+      }
+    };
+
+    fetchRoutes();
+  }, [currentLocation, orders, routesData.length]);
+
+  // Update distances and durations based on current position
+  useEffect(() => {
+    if (currentLocation && routesData.length > 0) {
+      const updatedOrders = orders.map((order) => {
+        const routeData = routesData.find((route) => route.orderId === order._id);
+        if (routeData && routeData.route && routeData.route.overview_polyline) {
+          const decodedPath = polyline.decode(routeData.route.overview_polyline);
+
+          // Create a LineString from the route
+          const routeLine = turf.lineString(decodedPath.map(([lat, lng]) => [lng, lat]));
+
+          // Create a Point from the current location
+          const currentPoint = turf.point([currentLocation.lng, currentLocation.lat]);
+
+          // Snap current location to the nearest point on the route
+          const snapped = turf.nearestPointOnLine(routeLine, currentPoint);
+
+          // Calculate the remaining distance along the route
+          const sliced = turf.lineSlice(
+            snapped,
+            turf.point(routeLine.geometry.coordinates[routeLine.geometry.coordinates.length - 1]),
+            routeLine
+          );
+          const remainingDistance = turf.length(sliced, { units: 'kilometers' });
+
+          // Estimate remaining time based on average speed
+          const averageSpeedKmh = 40; // Adjust as necessary
+          const estimatedTimeInMinutes = ((remainingDistance / averageSpeedKmh) * 60).toFixed(0);
+
+          return {
+            ...order,
+            distance: `${remainingDistance.toFixed(2)} km`,
+            duration: `${estimatedTimeInMinutes} mins`,
+            distanceValue: remainingDistance * 1000, // in meters
+          };
+        } else {
+          return order;
+        }
+      });
+
+      // Sort orders by remaining distance
+      updatedOrders.sort((a, b) => a.distanceValue - b.distanceValue);
+
+      setOrders(updatedOrders);
+    }
+  }, [currentLocation, routesData]);
+
+  // Detect significant deviation or time elapsed
+  useEffect(() => {
+    const deviationThreshold = 0.1; // in kilometers (e.g., 100 meters)
+    const timeThreshold = 300000; // 5 minutes in milliseconds
+
+    if (currentLocation && routesData.length > 0) {
+      routesData.forEach((routeData, index) => {
+        const decodedPath = polyline.decode(routeData.route.overview_polyline);
+        const routeLine = turf.lineString(decodedPath.map(([lat, lng]) => [lng, lat]));
+        const currentPoint = turf.point([currentLocation.lng, currentLocation.lat]);
+        const snapped = turf.nearestPointOnLine(routeLine, currentPoint);
+        const distanceFromRoute = turf.distance(currentPoint, snapped, { units: 'kilometers' });
+
+        const now = Date.now();
+        if (distanceFromRoute > deviationThreshold || now - routeData.lastUpdated > timeThreshold) {
+          // Re-fetch route for this order
+          console.log('Re-fetching route due to deviation or time elapsed');
+          const service = new window.google.maps.DirectionsService();
+          service.route(
+            {
+              origin: currentLocation,
+              destination: {
+                lat: orders[index].location.latitude,
+                lng: orders[index].location.longitude,
+              },
+              travelMode: window.google.maps.TravelMode.DRIVING,
+            },
+            (result, status) => {
+              if (status === window.google.maps.DirectionsStatus.OK) {
+                const newRouteData = {
+                  orderId: orders[index]._id,
+                  route: result.routes[0],
+                  lastUpdated: now,
+                };
+                setRoutesData((prevRoutesData) => {
+                  const newRoutesData = [...prevRoutesData];
+                  newRoutesData[index] = newRouteData;
+                  return newRoutesData;
+                });
+              } else {
+                console.error('Error re-fetching route:', status);
+              }
+            }
+          );
+        }
       });
     }
-  }, [currentLocation]);
+  }, [currentLocation, routesData, orders]);
 
-  // Update the map when the current location or order changes
+  // Update the map with current position and route
   useEffect(() => {
-    if (currentLocation && orders[currentOrderIndex]?.location && mapRef.current) {
-      const destination = {
-        lat: orders[currentOrderIndex].location.latitude,
-        lng: orders[currentOrderIndex].location.longitude,
-      };
+    if (mapRef.current && currentLocation) {
+      // Update delivery boy's marker
+      if (deliveryBoyMarkerRef.current) {
+        deliveryBoyMarkerRef.current.setPosition(currentLocation);
+      }
 
-      // Update map center to current location
-      mapRef.current.setCenter(currentLocation);
+      // Optionally, draw the route on the map
+      const routeData = routesData.find((route) => route.orderId === orders[currentOrderIndex]?._id);
+      if (routeData) {
+        const decodedPath = polyline.decode(routeData.route.overview_polyline);
+        const routePath = decodedPath.map(([lat, lng]) => ({
+          lat,
+          lng,
+        }));
 
-      // Fetch and display the route
-      directionsServiceRef.current.route(
-        {
-          origin: currentLocation,
-          destination,
-          travelMode: window.google.maps.TravelMode.DRIVING,
-        },
-        (result, status) => {
-          if (status === window.google.maps.DirectionsStatus.OK) {
-            directionsRendererRef.current.setDirections(result);
-          } else {
-            console.error("Error fetching directions:", result);
-          }
+        if (routePolylineRef.current) {
+          routePolylineRef.current.setPath(routePath);
+        } else {
+          routePolylineRef.current = new window.google.maps.Polyline({
+            path: routePath,
+            geodesic: true,
+            strokeColor: '#FF0000',
+            strokeOpacity: 1.0,
+            strokeWeight: 4,
+            map: mapRef.current,
+          });
         }
-      );
-    }
-  }, [currentLocation, currentOrderIndex, orders]);
 
-  // Update distances and durations to each order when currentLocation changes
-  useEffect(() => {
-    if (currentLocation && orders.length > 0) {
-      const origins = [new window.google.maps.LatLng(currentLocation.lat, currentLocation.lng)];
-      const destinations = orders.map((order) => new window.google.maps.LatLng(order.location.latitude, order.location.longitude));
-
-      const service = new window.google.maps.DistanceMatrixService();
-      service.getDistanceMatrix(
-        {
-          origins,
-          destinations,
-          travelMode: window.google.maps.TravelMode.DRIVING,
-        },
-        (response, status) => {
-          if (status === window.google.maps.DistanceMatrixStatus.OK) {
-            const updatedOrders = orders.map((order, index) => {
-              const element = response.rows[0].elements[index];
-              return {
-                ...order,
-                distance: element.distance ? element.distance.text : 'Unknown',
-                duration: element.duration ? element.duration.text : 'Unknown',
-                distanceValue: element.distance ? element.distance.value : Infinity,
-              };
-            });
-
-            // Sort orders by distance
-            updatedOrders.sort((a, b) => a.distanceValue - b.distanceValue);
-
-            setOrders(updatedOrders);
-          } else {
-            console.error('Error fetching distance matrix:', response);
-          }
+        // Remove previous origin and destination markers if they exist
+        if (originMarkerRef.current) {
+          originMarkerRef.current.setMap(null);
         }
-      );
+        if (destinationMarkerRef.current) {
+          destinationMarkerRef.current.setMap(null);
+        }
+
+        // Add origin marker (start point)
+        originMarkerRef.current = new window.google.maps.Marker({
+          position: routePath[0],
+          map: mapRef.current,
+          icon: {
+            url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png', // Built-in green dot icon
+          },
+          title: 'Start Point',
+        });
+
+        // Add destination marker (end point)
+        destinationMarkerRef.current = new window.google.maps.Marker({
+          position: routePath[routePath.length - 1],
+          map: mapRef.current,
+          icon: {
+            url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png', // Built-in red dot icon
+          },
+          title: 'Destination',
+        });
+      }
     }
-  }, [currentLocation]);
+  }, [currentLocation, routesData, currentOrderIndex, orders]);
 
   // Handle the "Next Order" action
   const handleNextOrder = () => {
@@ -216,10 +344,36 @@ export function ViewOrder() {
 
 export default ViewOrder;
 
-/* ... (Other components remain the same, but we'll update the UserList component to display distance and duration) ... */
+
+
+// SubComponents.jsx
 
 import { PhoneIcon } from "@heroicons/react/24/outline";
 import { Car } from 'lucide-react';
+
+export const NextOrderAndCallAction = ({ currentOrder, handleCall }) => (
+  <div className="px-4 py-2 text-white">
+    {currentOrder && (
+      <div className="bg-orange-700 flex items-center justify-between shadow-md p-3 rounded-xl shining-border">
+        <div className="flex items-center">
+          <img
+            src="https://img.pikbest.com/png-images/20240516/scooter-delivery-man-takeway-food-_10566930.png!sw800"
+            alt="Driver"
+            className="h-12 w-12 rounded-full mr-3"
+          />
+          <div>
+            <p className="font-semibold">{currentOrder.name}</p>
+            <p className="text-sm">{currentOrder.duration || "Unknown km"}</p>
+          </div>
+        </div>
+        <PhoneIcon
+          className="h-6 w-6 cursor-pointer"
+          onClick={() => handleCall(currentOrder.phone)}
+        />
+      </div>
+    )}
+  </div>
+);
 
 export const UserList = ({ orders, currentOrderIndex, handleUserClick }) => (
   <div className="px-4 pt-2 pb-16">
@@ -236,7 +390,7 @@ export const UserList = ({ orders, currentOrderIndex, handleUserClick }) => (
               <div className="ml-4">
                 <p className={`font-medium ${index === currentOrderIndex ? 'text-green-800' : ''}`}>{order.name}</p>
                 <p className={`text-xs text-gray-500 ${index === currentOrderIndex ? 'text-green-500' : ''}`}>
-                  Estimated time: {order.duration || 'Unknown'} | Distance: {order.distance || 'Unknown'}
+                  Estimated time: {order.duration} | Distance: {order.distance}
                 </p>
               </div>
             </div>
@@ -250,97 +404,45 @@ export const UserList = ({ orders, currentOrderIndex, handleUserClick }) => (
   </div>
 );
 
-
-
-/* ... (Rest of the components remain unchanged) ... */
-
-
-
-import { ArrowLeftOnRectangleIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { IconButton } from "@material-tailwind/react";
-
-export const MapDisplay = ({ mapRef }) => (
-    <div className="relative h-2/4 w-full">
-      {/* Map and Route Display */}
-      <div className="relative h-full w-full">
-        <div ref={mapRef} style={{ height: '100%', width: '100%' }}></div>
-      </div>
-  
-      {/* Top Section */}
-      <div className="absolute top-0 inset-x-0 flex items-center justify-between p-4 z-20 bg-transparent">
-      </div>
-    </div>
-  );
-
-  export const NextOrderAndCallAction = ({ currentOrder, handleCall }) => (
-    <div className="px-4 py-2 text-white">
-      {currentOrder && (
-        <div className="bg-orange-700 flex items-center justify-between shadow-md p-3 rounded-xl shining-border">
-          <div className="flex items-center">
-            <img
-              src="https://img.pikbest.com/png-images/20240516/scooter-delivery-man-takeway-food-_10566930.png!sw800"
-              alt="Driver"
-              className="h-12 w-12 rounded-full mr-3"
-            />
-            <div>
-              <p className="font-semibold">{currentOrder.name}</p>
-              <p className="text-sm">{currentOrder.estimatedTime || "Unknown km"}</p>
-            </div>
-          </div>
-          <PhoneIcon
-            className="h-6 w-6 cursor-pointer"
-            onClick={() => handleCall(currentOrder.phone)}
-          />
-        </div>
-      )}
-    </div>
-  );
-
-
 export const NavigationGuidance = ({ expanded, setExpanded, currentOrder, handleNextOrder, handleImageClick, selectedImage, handleCloseImage }) => (
-    <div className="relative">
-      <div className="fixed bottom-0 w-full transition-transform duration-300 ease-in-out">
-        <div className="bg-orange-800 shadow-md p-3 h-16 rounded-t-md flex justify-between items-center cursor-pointer font-bold text-white">
-          <p className="text-sm" onClick={handleNextOrder}>Next</p>
-          <p className="text-sm" onClick={() => setExpanded(!expanded)}>Delivered</p>
-        </div>
+  <div className="relative">
+    <div className="fixed bottom-0 w-full transition-transform duration-300 ease-in-out">
+      <div className="bg-orange-800 shadow-md p-3 h-16 rounded-t-md flex justify-between items-center cursor-pointer font-bold text-white">
+        <p className="text-sm" onClick={handleNextOrder}>Next</p>
+        <p className="text-sm" onClick={() => setExpanded(!expanded)}>Delivered</p>
       </div>
-  
-      {expanded && (
-        <div className="absolute left-0 right-0 bottom-16 bg-white p-4 flex flex-col items-center">
-          {/* Expanding Image Section */}
-          {currentOrder.images && currentOrder.images.length > 0 ? (
-            <div className="image-container flex justify-center space-x-4">
-              {currentOrder.images.map((image, index) => (
-                <img
-                  key={index}
-                  src={image}
-                  alt={`Delivery ${index}`}
-                  className="w-24 h-24 cursor-pointer"
-                  onClick={() => handleImageClick(image)}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="image-container flex justify-center gap-3">
-              <div className="skeleton-loader w-24 h-24 bg-gray-300 animate-pulse rounded-md" />
-              <div className="skeleton-loader w-24 h-24 bg-gray-300 animate-pulse rounded-md" />
-              <div className="skeleton-loader w-24 h-24 bg-gray-300 animate-pulse rounded-md" />
-            </div>
-          )}
-  
-          {selectedImage && (
-            <div className="zoomed-image-overlay fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-              <img src={selectedImage} alt="Zoomed" className="max-w-full max-h-full" />
-              <button className="absolute top-4 right-4 text-white" onClick={handleCloseImage}>Close</button>
-            </div>
-          )}
-        </div>
-      )}
     </div>
-  );
 
+    {expanded && (
+      <div className="absolute left-0 right-0 bottom-16 bg-white p-4 flex flex-col items-center">
+        {/* Expanding Image Section */}
+        {currentOrder?.images && currentOrder.images.length > 0 ? (
+          <div className="image-container flex justify-center space-x-4">
+            {currentOrder.images.map((image, index) => (
+              <img
+                key={index}
+                src={image}
+                alt={`Delivery ${index}`}
+                className="w-24 h-24 cursor-pointer"
+                onClick={() => handleImageClick(image)}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="image-container flex justify-center gap-3">
+            <div className="skeleton-loader w-24 h-24 bg-gray-300 animate-pulse rounded-md" />
+            <div className="skeleton-loader w-24 h-24 bg-gray-300 animate-pulse rounded-md" />
+            <div className="skeleton-loader w-24 h-24 bg-gray-300 animate-pulse rounded-md" />
+          </div>
+        )}
 
-
-
-  
+        {selectedImage && (
+          <div className="zoomed-image-overlay fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <img src={selectedImage} alt="Zoomed" className="max-w-full max-h-full" />
+            <button className="absolute top-4 right-4 text-white" onClick={handleCloseImage}>Close</button>
+          </div>
+        )}
+      </div>
+    )}
+  </div>
+);
