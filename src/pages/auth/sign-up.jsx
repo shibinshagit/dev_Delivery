@@ -48,13 +48,18 @@ export function SignUp() {
   };
 
   return (
-    <section className="mx-2 flex">
+    <section className="mx- flex ">
       <div className="flex justify-center items-center w-full min-h-screen py-6">
         <div className="w-full sm:w-4/5 md:w-3/5 lg:w-3/5 flex flex-col items-center justify-center">
           <div className="text-center">
             <Typography variant="h2" className="font-bold mb-4"></Typography>
+            <img
+              src="https://cdn.dribbble.com/users/1122277/screenshots/2921414/scooter-for-dribble.gif"
+              alt="Driver"
+              className=""
+            />
           </div>
-          <form className="mt-8 mb-2 mx-auto w-11/12 sm:w-80 max-w-screen-lg lg:w-1/2" onSubmit={handleEmailSubmit}>
+          <form className=" mb-2 mx-auto w-11/12 sm:w-80 max-w-screen-lg lg:w-1/2" onSubmit={handleEmailSubmit}>
             <div className="space-y-4 mt-8">
               <Button size="lg" color="white" className="flex items-center gap-2 justify-center shadow-md" fullWidth>
                 <img src='https://bismimess.online/assets/img/gallery/bismi.png' className='w-8 h-8' alt="Logo" />
