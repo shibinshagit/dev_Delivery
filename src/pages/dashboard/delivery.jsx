@@ -1,12 +1,12 @@
 // ViewOrder.jsx
-
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import polyline from '@mapbox/polyline';
 import * as turf from '@turf/turf';
 import { BaseUrl } from '@/constants/BaseUrl';
-
+import { PhoneIcon } from "@heroicons/react/24/outline";
+import { Car } from 'lucide-react';
 
 export function ViewOrder() {
   const { id } = useParams();
@@ -20,14 +20,169 @@ export function ViewOrder() {
   const routePolylineRef = useRef(null);
   const [routesData, setRoutesData] = useState([]); // Store route data
   const [mapLoaded, setMapLoaded] = useState(false);
-  const originMarkerRef = useRef(null);
   const destinationMarkerRef = useRef(null);
+
+  // Map style for dark theme (e.g., Uber-like)
+  const mapStyle = [
+    // Include the full style array for the dark theme
+    // You can get styles from Snazzy Maps or customize your own
+    {
+      "elementType": "geometry",
+      "stylers": [
+        { "color": "#212121" }
+      ]
+    },
+    {
+      "elementType": "labels.icon",
+      "stylers": [
+        { "visibility": "off" }
+      ]
+    },
+    {
+      "elementType": "labels.text.fill",
+      "stylers": [
+        { "color": "#757575" }
+      ]
+    },
+    {
+      "elementType": "labels.text.stroke",
+      "stylers": [
+        { "color": "#212121" }
+      ]
+    },
+    {
+      "featureType": "administrative",
+      "elementType": "geometry",
+      "stylers": [
+        { "color": "#757575" }
+      ]
+    },
+    {
+      "featureType": "administrative.country",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        { "color": "#9e9e9e" }
+      ]
+    },
+    {
+      "featureType": "administrative.land_parcel",
+      "stylers": [
+        { "visibility": "off" }
+      ]
+    },
+    {
+      "featureType": "administrative.locality",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        { "color": "#bdbdbd" }
+      ]
+    },
+    {
+      "featureType": "poi",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        { "color": "#757575" }
+      ]
+    },
+    {
+      "featureType": "poi.park",
+      "elementType": "geometry",
+      "stylers": [
+        { "color": "#181818" }
+      ]
+    },
+    {
+      "featureType": "poi.park",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        { "color": "#616161" }
+      ]
+    },
+    {
+      "featureType": "poi.park",
+      "elementType": "labels.text.stroke",
+      "stylers": [
+        { "color": "#1b1b1b" }
+      ]
+    },
+    {
+      "featureType": "road",
+      "elementType": "geometry.fill",
+      "stylers": [
+        { "color": "#2c2c2c" }
+      ]
+    },
+    {
+      "featureType": "road",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        { "color": "#8a8a8a" }
+      ]
+    },
+    {
+      "featureType": "road.arterial",
+      "elementType": "geometry",
+      "stylers": [
+        { "color": "#373737" }
+      ]
+    },
+    {
+      "featureType": "road.highway",
+      "elementType": "geometry",
+      "stylers": [
+        { "color": "#3c3c3c" }
+      ]
+    },
+    {
+      "featureType": "road.highway.controlled_access",
+      "elementType": "geometry",
+      "stylers": [
+        { "color": "#4e4e4e" }
+      ]
+    },
+    {
+      "featureType": "road.local",
+      "elementType": "labels",
+      "stylers": [
+        { "visibility": "off" }
+      ]
+    },
+    {
+      "featureType": "road.local",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        { "color": "#616161" }
+      ]
+    },
+    {
+      "featureType": "transit",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        { "color": "#757575" }
+      ]
+    },
+    {
+      "featureType": "water",
+      "elementType": "geometry",
+      "stylers": [
+        { "color": "#000000" }
+      ]
+    },
+    {
+      "featureType": "water",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        { "color": "#3d3d3d" }
+      ]
+    }
+  ];
 
   // Fetch orders from API
   const fetchOrders = async () => {
     try {
       const response = await axios.get(`${BaseUrl}/services/orders/${id}`);
       if (response.status === 200) {
+        console.log('userData:', response.data.users);
         setOrders(response.data.users);
       } else {
         console.error("Error fetching orders");
@@ -75,18 +230,24 @@ export function ViewOrder() {
         zoomControl: true,
         streetViewControl: false,
         scaleControl: false,
+        styles: mapStyle, // Apply the dark theme style
       };
 
       // Create the map instance
       mapRef.current = new window.google.maps.Map(document.getElementById('map'), mapOptions);
 
-      // Place a marker for the delivery boy
+      // Place a marker for the delivery boy with an arrow icon
       deliveryBoyMarkerRef.current = new window.google.maps.Marker({
         position: currentLocation,
         map: mapRef.current,
         icon: {
-          url: 'https://maps.google.com/mapfiles/ms/icons/blue.png', // Use a car icon URL or your own icon
-          scaledSize: new window.google.maps.Size(32, 32), // Adjust size as needed
+          path: window.google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+          scale: 5,
+          rotation: 0, // We'll update this to match the heading
+          fillColor: '#0000FF',
+          fillOpacity: 1,
+          strokeWeight: 1,
+          strokeColor: '#FFFFFF',
         },
       });
 
@@ -101,6 +262,9 @@ export function ViewOrder() {
         console.log('Fetching initial routes');
         const service = new window.google.maps.DirectionsService();
         const routePromises = orders.map((order) => {
+          if (!order.location || !order.location.latitude || !order.location.longitude) {
+            return Promise.resolve(null); // Skip users without location
+          }
           return new Promise((resolve) => {
             service.route(
               {
@@ -144,6 +308,16 @@ export function ViewOrder() {
   useEffect(() => {
     if (currentLocation && routesData.length > 0) {
       const updatedOrders = orders.map((order) => {
+        if (!order.location || !order.location.latitude || !order.location.longitude) {
+          // User doesn't have location data
+          return {
+            ...order,
+            distance: 'N/A',
+            duration: 'N/A',
+            distanceValue: Infinity, // Put at the end when sorting
+          };
+        }
+
         const routeData = routesData.find((route) => route.orderId === order._id);
         if (routeData && routeData.route && routeData.route.overview_polyline) {
           const decodedPath = polyline.decode(routeData.route.overview_polyline);
@@ -187,112 +361,68 @@ export function ViewOrder() {
     }
   }, [currentLocation, routesData]);
 
-  // Detect significant deviation or time elapsed
-  useEffect(() => {
-    const deviationThreshold = 0.1; // in kilometers (e.g., 100 meters)
-    const timeThreshold = 300000; // 5 minutes in milliseconds
-
-    if (currentLocation && routesData.length > 0) {
-      routesData.forEach((routeData, index) => {
-        const decodedPath = polyline.decode(routeData.route.overview_polyline);
-        const routeLine = turf.lineString(decodedPath.map(([lat, lng]) => [lng, lat]));
-        const currentPoint = turf.point([currentLocation.lng, currentLocation.lat]);
-        const snapped = turf.nearestPointOnLine(routeLine, currentPoint);
-        const distanceFromRoute = turf.distance(currentPoint, snapped, { units: 'kilometers' });
-
-        const now = Date.now();
-        if (distanceFromRoute > deviationThreshold || now - routeData.lastUpdated > timeThreshold) {
-          // Re-fetch route for this order
-          console.log('Re-fetching route due to deviation or time elapsed');
-          const service = new window.google.maps.DirectionsService();
-          service.route(
-            {
-              origin: currentLocation,
-              destination: {
-                lat: orders[index].location.latitude,
-                lng: orders[index].location.longitude,
-              },
-              travelMode: window.google.maps.TravelMode.DRIVING,
-            },
-            (result, status) => {
-              if (status === window.google.maps.DirectionsStatus.OK) {
-                const newRouteData = {
-                  orderId: orders[index]._id,
-                  route: result.routes[0],
-                  lastUpdated: now,
-                };
-                setRoutesData((prevRoutesData) => {
-                  const newRoutesData = [...prevRoutesData];
-                  newRoutesData[index] = newRouteData;
-                  return newRoutesData;
-                });
-              } else {
-                console.error('Error re-fetching route:', status);
-              }
-            }
-          );
-        }
-      });
-    }
-  }, [currentLocation, routesData, orders]);
-
   // Update the map with current position and route
   useEffect(() => {
     if (mapRef.current && currentLocation) {
-      // Update delivery boy's marker
+      // Update delivery boy's marker position and rotation
       if (deliveryBoyMarkerRef.current) {
         deliveryBoyMarkerRef.current.setPosition(currentLocation);
+
+        // Optionally, update the rotation based on movement
+        // You can implement logic to calculate heading and set the rotation
       }
 
-      // Optionally, draw the route on the map
-      const routeData = routesData.find((route) => route.orderId === orders[currentOrderIndex]?._id);
-      if (routeData) {
-        const decodedPath = polyline.decode(routeData.route.overview_polyline);
-        const routePath = decodedPath.map(([lat, lng]) => ({
-          lat,
-          lng,
-        }));
+      // Draw the route on the map
+      const currentOrder = orders[currentOrderIndex];
+      if (
+        currentOrder &&
+        currentOrder.location &&
+        currentOrder.location.latitude &&
+        currentOrder.location.longitude
+      ) {
+        const routeData = routesData.find((route) => route.orderId === currentOrder._id);
+        if (routeData) {
+          const decodedPath = polyline.decode(routeData.route.overview_polyline);
+          const routePath = decodedPath.map(([lat, lng]) => ({
+            lat,
+            lng,
+          }));
 
-        if (routePolylineRef.current) {
-          routePolylineRef.current.setPath(routePath);
-        } else {
-          routePolylineRef.current = new window.google.maps.Polyline({
-            path: routePath,
-            geodesic: true,
-            strokeColor: '#FF0000',
-            strokeOpacity: 1.0,
-            strokeWeight: 4,
+          if (routePolylineRef.current) {
+            routePolylineRef.current.setPath(routePath);
+          } else {
+            routePolylineRef.current = new window.google.maps.Polyline({
+              path: routePath,
+              geodesic: true,
+              strokeColor: '#FF0000',
+              strokeOpacity: 1.0,
+              strokeWeight: 4,
+              map: mapRef.current,
+            });
+          }
+
+          // Remove previous destination marker if it exists
+          if (destinationMarkerRef.current) {
+            destinationMarkerRef.current.setMap(null);
+          }
+
+          // Add destination marker (end point)
+          destinationMarkerRef.current = new window.google.maps.Marker({
+            position: routePath[routePath.length - 1],
             map: mapRef.current,
+            icon: {
+              url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png', // Built-in red dot icon
+            },
+            title: 'Destination',
           });
-        }
 
-        // Remove previous origin and destination markers if they exist
-        if (originMarkerRef.current) {
-          originMarkerRef.current.setMap(null);
+          // Fit map to the route bounds for better visibility
+          const bounds = new window.google.maps.LatLngBounds();
+          routePath.forEach((point) => {
+            bounds.extend(point);
+          });
+          mapRef.current.fitBounds(bounds);
         }
-        if (destinationMarkerRef.current) {
-          destinationMarkerRef.current.setMap(null);
-        }
-
-        // Add origin marker (start point)
-        originMarkerRef.current = new window.google.maps.Marker({
-          position: routePath[0],
-          map: mapRef.current,
-          icon: {
-            url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png', // Built-in green dot icon
-          },
-          title: 'Start Point',
-        });
-
-        // Add destination marker (end point)
-        destinationMarkerRef.current = new window.google.maps.Marker({
-          position: routePath[routePath.length - 1],
-          map: mapRef.current,
-          icon: {
-            url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png', // Built-in red dot icon
-          },
-          title: 'Destination',
-        });
       }
     }
   }, [currentLocation, routesData, currentOrderIndex, orders]);
@@ -324,20 +454,27 @@ export function ViewOrder() {
     setSelectedImage(null);
   };
 
+  // Adjusted layout: Map on top, other contents below
   return (
     <div className="flex flex-col h-screen overflow-hidden">
-      <div id="map" style={{ height: '400px' }} /> {/* Map container */}
-      <NextOrderAndCallAction currentOrder={orders[currentOrderIndex]} handleCall={handleCall} />
-      <UserList orders={orders} currentOrderIndex={currentOrderIndex} handleUserClick={handleUserClick} />
-      <NavigationGuidance
-        expanded={expanded}
-        setExpanded={setExpanded}
-        currentOrder={orders[currentOrderIndex]}
-        handleNextOrder={handleNextOrder}
-        handleImageClick={handleImageClick}
-        selectedImage={selectedImage}
-        handleCloseImage={handleCloseImage}
-      />
+      <div id="map" className="h-[70%]" /> {/* Map occupies 70% */}
+      <div className="h-[30%] overflow-auto">
+        <NextOrderAndCallAction currentOrder={orders[currentOrderIndex]} handleCall={handleCall} />
+        <UserList
+          orders={orders}
+          currentOrderIndex={currentOrderIndex}
+          handleUserClick={handleUserClick}
+        />
+        <NavigationGuidance
+          expanded={expanded}
+          setExpanded={setExpanded}
+          currentOrder={orders[currentOrderIndex]}
+          handleNextOrder={handleNextOrder}
+          handleImageClick={handleImageClick}
+          selectedImage={selectedImage}
+          handleCloseImage={handleCloseImage}
+        />
+      </div>
     </div>
   );
 }
@@ -346,10 +483,6 @@ export default ViewOrder;
 
 
 
-// SubComponents.jsx
-
-import { PhoneIcon } from "@heroicons/react/24/outline";
-import { Car } from 'lucide-react';
 
 export const NextOrderAndCallAction = ({ currentOrder, handleCall }) => (
   <div className="px-4 py-2 text-white">
@@ -375,36 +508,79 @@ export const NextOrderAndCallAction = ({ currentOrder, handleCall }) => (
   </div>
 );
 
-export const UserList = ({ orders, currentOrderIndex, handleUserClick }) => (
-  <div className="px-4 pt-2 pb-16">
-    <div className="shadow-md p-3 rounded-lg h-60 overflow-y-scroll">
-      <div className="text-sm">
-        {orders.map((order, index) => (
-          <div key={index}>
-            <div className="flex items-center py-2 cursor-pointer" onClick={() => handleUserClick(index)}>
-              <div className="flex-shrink-0">
-                <div className={`rounded-full p-2 ${index === currentOrderIndex ? 'bg-green-500' : 'bg-orange-500'}`}>
-                  <Car color='white' />
+export const UserList = ({ orders, currentOrderIndex, handleUserClick }) => {
+  // Separate orders with and without location
+  const ordersWithLocation = orders.filter(order => order.distanceValue !== Infinity);
+  const ordersWithoutLocation = orders.filter(order => order.distanceValue === Infinity);
+
+  return (
+    <div className="px-4 pt-2 pb-16">
+      <div className="shadow-md p-3 rounded-lg h-60 overflow-y-scroll">
+        <div className="text-sm">
+          {/* Orders with location */}
+          {ordersWithLocation.map((order, index) => (
+            <div key={order._id}>
+              <div className="flex items-center py-2 cursor-pointer" onClick={() => handleUserClick(index)}>
+                <div className="flex-shrink-0">
+                  <div className={`rounded-full p-2 ${index === currentOrderIndex ? 'bg-green-500' : 'bg-orange-500'}`}>
+                    <Car color='white' />
+                  </div>
+                </div>
+                <div className="ml-4">
+                  <p className={`font-medium ${index === currentOrderIndex ? 'text-green-800' : ''}`}>{order.name}</p>
+                  <p className={`text-xs text-gray-500 ${index === currentOrderIndex ? 'text-green-500' : ''}`}>
+                    Estimated time: {order.duration} | Distance: {order.distance}
+                  </p>
                 </div>
               </div>
-              <div className="ml-4">
-                <p className={`font-medium ${index === currentOrderIndex ? 'text-green-800' : ''}`}>{order.name}</p>
-                <p className={`text-xs text-gray-500 ${index === currentOrderIndex ? 'text-green-500' : ''}`}>
-                  Estimated time: {order.duration} | Distance: {order.distance}
-                </p>
-              </div>
+              {index < ordersWithLocation.length - 1 && (
+                <div className="ml-3 border-l-2 border-dashed border-orange-500 h-6 my-1"></div>
+              )}
             </div>
-            {index < orders.length - 1 && (
-              <div className="ml-3 border-l-2 border-dashed border-orange-500 h-6 my-1"></div>
-            )}
-          </div>
-        ))}
+          ))}
+
+          {/* Users without location */}
+          {ordersWithoutLocation.length > 0 && (
+            <div>
+              <h3 className="font-bold mt-4">All</h3>
+              {ordersWithoutLocation.map((order, index) => (
+                <div key={order._id}>
+                  <div className="flex items-center py-2">
+                    <div className="flex-shrink-0">
+                      <div className="rounded-full p-2 bg-gray-500">
+                        <Car color='white' />
+                      </div>
+                    </div>
+                    <div className="ml-4">
+                      <p className="font-medium">{order.name}</p>
+                      <div className="flex items-center">
+                        <p className="text-xs text-red-500">Location not available</p>
+                        <button className="ml-2 text-xs text-blue-500 underline">Add Location</button>
+                      </div>
+                    </div>
+                  </div>
+                  {index < ordersWithoutLocation.length - 1 && (
+                    <div className="ml-3 border-l-2 border-dashed border-gray-500 h-6 my-1"></div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
-export const NavigationGuidance = ({ expanded, setExpanded, currentOrder, handleNextOrder, handleImageClick, selectedImage, handleCloseImage }) => (
+export const NavigationGuidance = ({
+  expanded,
+  setExpanded,
+  currentOrder,
+  handleNextOrder,
+  handleImageClick,
+  selectedImage,
+  handleCloseImage,
+}) => (
   <div className="relative">
     <div className="fixed bottom-0 w-full transition-transform duration-300 ease-in-out">
       <div className="bg-orange-800 shadow-md p-3 h-16 rounded-t-md flex justify-between items-center cursor-pointer font-bold text-white">
